@@ -1,9 +1,13 @@
 import {api} from "boot/axios"
 
 class TeamService {
-  async createNewTeam(name, customNumber) {
+  async createNewTeam(name) {
     try {
-      return await api.post("/teams?name=" + name + "&number=" + customNumber)
+      return await api.post("/teams", {}, {
+        params: {
+          name
+        },
+      })
     } catch (e) {
       throw e
     }

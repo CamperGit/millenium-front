@@ -23,7 +23,7 @@
 <script>
 import {defineComponent, ref} from 'vue';
 import ProductService from "src/services/ProductService";
-import TeamService from "src/services/TeamService";
+import TeamService from "src/services/team/teamService";
 
 export default defineComponent({
   name: 'PageIndex',
