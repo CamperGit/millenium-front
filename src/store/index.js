@@ -2,6 +2,7 @@ import { store } from 'quasar/wrappers'
 import { createStore } from 'vuex'
 
 import teams from './teams'
+import auth from './auth'
 
 /*
  * If not building with SSR mode, you can
@@ -15,7 +16,8 @@ import teams from './teams'
 export default store(function (/* { ssrContext } */) {
   const Store = createStore({
     modules: {
-      teams
+      teams,
+      auth
     },
 
     // enable strict mode (adds overhead!)

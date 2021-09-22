@@ -24,6 +24,7 @@ module.exports = configure(function (ctx) {
     boot: [
       'i18n',
       'axios',
+      'init'
     ],
 
     // https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
