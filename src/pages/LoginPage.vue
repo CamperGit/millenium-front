@@ -34,7 +34,7 @@
           />
 
           <div>
-            <q-btn label="Войти" type="submit" color="primary" />
+            <q-btn label="Войти" type="submit" color="primary"/>
             <q-btn
               label="Очистить"
               type="reset"
@@ -50,8 +50,8 @@
 </template>
 
 <script>
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import {useStore} from "vuex";
+import {useRouter} from "vue-router";
 import {ref} from "vue";
 import {useQuasar} from "quasar";
 
@@ -64,13 +64,37 @@ export default {
 
     const username = ref('');
     const password = ref('');
-    const loggedIn = ref(store.state.auth.loggedIn);
-    if (loggedIn.value) {
-      router.push("/");
+
+    const handleLogin = async (user) => {
+      try {
+        const data = await store.dispatch("auth/loginAction", user);
+        console.log(data)
+        $q.notify({
+          color: "green-4",
+          textColor: "white",
+          icon: "cloud_done",
+          message: "Успешная авторизация",
+        });
+        await router.push("/");
+      } catch (e) {
+        message.value = e.response.data.message;
+        $q.notify({
+          color: "red-5",
+          textColor: "white",
+          icon: "warning",
+          message,
+        });
+      }
     }
 
     return {
-
+      username,
+      password,
+      handleLogin,
+      onReset() {
+        username.value = null;
+        password.value = null;
+      },
     }
   }
 }

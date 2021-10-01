@@ -46,9 +46,4 @@ export default boot(async ( { router, store} ) => {
       return Promise.reject(err);
     }
   );
-
-  const currentUser = store.getters['auth/getCurrentUser'];
-  if (currentUser === null) {
-    router.push("/auth/login");
-  }
 })

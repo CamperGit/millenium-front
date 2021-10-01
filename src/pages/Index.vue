@@ -21,13 +21,17 @@
 </template>
 
 <script>
-import {defineComponent, ref} from 'vue';
+import {defineComponent, ref, onMounted} from 'vue';
 import ProductService from "src/services/ProductService";
 import TeamService from "src/services/team/teamService";
+import {useRouter} from "vue-router";
+import {useStore} from "vuex"
 
 export default defineComponent({
   name: 'PageIndex',
   setup() {
+    const router = useRouter();
+    const store = useStore();
     const producer = ref('');
     const bitRate = ref('');
     const mediaType = ref('');
@@ -68,6 +72,14 @@ export default defineComponent({
     const goUrl = (url) => {
       window.open(url);
     }
+
+    onMounted(()=>{
+      const currentUser = store.getters['auth/getCurrentUser'];
+      console.log(currentUser);
+      if (currentUser === null) {
+        router.push("/auth/login");
+      }
+    })
 
     return {
       producer,
