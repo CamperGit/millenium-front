@@ -115,3 +115,8 @@ export default defineComponent({
   }
 })
 </script>
+<style>
+body {
+  background-color: rgb(250, 250, 250);
+}
+</style>

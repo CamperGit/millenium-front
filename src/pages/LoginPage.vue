@@ -1,51 +1,61 @@
 <template>
-  <q-page>
-    <q-card class="flex flex-center">
-      <q-card-section>
-        <q-form
-          @submit="handleLogin({ username, password })"
-          @reset="onReset"
-          class="q-gutter-md"
-        >
-          <q-input
-            filled
-            v-model="username"
-            label="Имя пользователя *"
-            hint="Латинские символы и цифры"
-            lazy-rules
-            :rules="[
-                (val) =>
-                  (!!val && val.length >= 6 && val.length <= 16) ||
-                  'Имя пользователя должно быть в пределах от 6 до 16 символов',
-              ]"
-          />
-
-          <q-input
-            filled
-            type="password"
-            v-model="password"
-            label="Пароль *"
-            lazy-rules
-            :rules="[
+  <q-page class="flex flex-center">
+    <div class="col-12">
+      <div class="col-6">
+        <q-card style="width: 400px; background-color: white" flat bordered>
+          <q-card-section class="q-py-none q-px-md" style="text-align: center">
+            <h3 class="q-my-lg">Millenium</h3>
+          </q-card-section>
+          <q-card-section class="q-py-none">
+            <q-form
+              @submit="handleLogin({ username, password })"
+              class="q-gutter-sm"
+            >
+              <q-card flat class="q-pt-none">
+                <q-card-section class="q-ma-none q-px-none q-pt-none" style="padding-bottom: 2px;">
+                  <q-input standout v-model="username" label="Имя пользователя" :dense="true"
+                           :rules="[
+                       (val) =>
+                       (!!val && val.length >= 6 && val.length <= 16) ||
+                       'Имя пользователя должно быть в пределах от 6 до 16 символов',
+                    ]"
+                           style="padding: 5px 0;"/>
+                </q-card-section>
+                <q-card-section class="q-pa-none q-ma-none">
+                  <q-input
+                    type="password"
+                    v-model="password"
+                    label="Пароль"
+                    lazy-rules
+                    standout
+                    :dense="true"
+                    :rules="[
                 (val) =>
                   (!!val && val.length >= 6 && val.length <= 20) ||
                   'Пароль должен содержать от 6 до 20 символов',
               ]"
-          />
 
-          <div>
-            <q-btn label="Войти" type="submit" color="primary"/>
-            <q-btn
-              label="Очистить"
-              type="reset"
-              color="primary"
-              flat
-              class="q-ml-sm"
-            />
-          </div>
-        </q-form>
-      </q-card-section>
-    </q-card>
+                  />
+                </q-card-section>
+                <q-card-section  class="q-px-none q-pt-none q-ma-none q-pb-md">
+                  <q-btn no-caps label="Войти" type="submit" color="primary" style="width: 100%"/>
+                </q-card-section>
+              </q-card>
+            </q-form>
+          </q-card-section>
+        </q-card>
+      </div>
+      <div class="col-6 q-pt-lg">
+        <q-card flat bordered >
+          <q-card-section class="q-py-sm q-px-md row justify-center" style="text-align: center; vertical-align: middle; display: table-cell;" >
+            <span>У вас ещё нет аккаунта?</span>
+            <q-btn flat color="primary" :to="'/auth/signup'" no-caps label="Зарегистрироваться"></q-btn>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+
+
   </q-page>
 </template>
 
@@ -54,6 +64,7 @@ import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 import {ref} from "vue";
 import {useQuasar} from "quasar";
+
 
 export default {
   name: "AuthPage",
@@ -91,10 +102,6 @@ export default {
       username,
       password,
       handleLogin,
-      onReset() {
-        username.value = null;
-        password.value = null;
-      },
     }
   }
 }
