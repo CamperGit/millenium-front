@@ -13,7 +13,7 @@
           </q-card-section>
           <q-card-section class="q-py-none">
             <q-form
-              @submit="handleLogin({ username, password })"
+              @submit="handleRegister({ username, email, password })"
               @validation-error="onValidError"
               @validation-success="errorMessage = null"
             >
@@ -45,7 +45,7 @@
                   />
                 </q-card-section>
                 <q-card-section class="q-pt-md q-px-none">
-                  <q-btn no-caps label="Войти" type="submit" color="primary" style="width: 100%"/>
+                  <q-btn no-caps label="Зарегистрироваться" type="submit" color="primary" style="width: 100%"/>
                 </q-card-section>
                 <q-card-section v-if="errorMessage" style="text-align: center" class="q-pa-none q-pb-md">
                   <span style="color: #ed4956;">{{errorMessage}}</span>
@@ -89,24 +89,30 @@ export default {
     const email = ref('');
     const errorMessage = ref(null);
 
-    const handleLogin = async (user) => {
+    const handleRegister = async (user) => {
       try {
-        const data = await store.dispatch("auth/loginAction", user);
-        console.log(data)
+        const {data} = await store.dispatch("auth/registerAction", user);
+        errorMessage.value = data;
+        const loginData = await store.dispatch("auth/loginAction", {
+          username: user.username,
+          password: user.password
+        });
+        console.log("loginData: " + loginData.data);
         $q.notify({
           color: "green-4",
           textColor: "white",
           icon: "cloud_done",
-          message: "Успешная авторизация",
+          message: "Успешная регистрация",
         });
         await router.push("/");
       } catch (e) {
-        message.value = e.response.data.message;
+        errorMessage.value = e?.response?.data?.message;
+        console.log(e)
         $q.notify({
           color: "red-5",
           textColor: "white",
           icon: "warning",
-          message,
+          errorMessage,
         });
       }
     }
@@ -134,7 +140,7 @@ export default {
       email,
       password,
       errorMessage,
-      handleLogin,
+      handleRegister,
       isValidEmail,
       onValidError
     }
