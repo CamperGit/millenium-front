@@ -14,52 +14,41 @@
           <q-card-section class="q-py-none">
             <q-form
               @submit="handleLogin({ username, password })"
-              class="q-gutter-sm"
+              @validation-error="onValidError"
+              @validation-success="errorMessage = null"
             >
               <q-card flat class="q-pt-none">
-                <q-card-section class="q-ma-none q-px-none q-pt-none" style="padding-bottom: 2px;">
-                  <q-input
-                    standout
-                    v-model="username"
-                    label="Имя пользователя" :dense="true"
-                    :rules="[
+                <q-card-section class="q-pa-none">
+                  <q-input id="username-field" filled v-model="username" label="Имя пользователя" dense class="q-pa-none"
+                           :rules="[
                        (val) =>
-                       (!!val && val.length >= 6 && val.length <= 16) ||
-                       'Имя пользователя должно быть в пределах от 6 до 16 символов',
+                       (!!val && val.length >= 6 && val.length <= 16),
                     ]"
-                    style="padding: 5px 0;"/>
+                           style="padding: 3px 0;"/>
                 </q-card-section>
-                <q-card-section class="q-ma-none q-px-none q-pt-none">
-                  <q-input
-                    v-model="email"
-                    label="Email"
-                    lazy-rules
-                    standout
-                    :dense="true"
-                    :rules="[
-                (val) => !!val || 'Поле не может быть пустым',
+                <q-card-section  class="q-pa-none">
+                  <q-input id="email-field" filled v-model="email" label="Email" lazy-rules dense class="q-pa-none"
+                           :rules="[
+                (val) => !!val ,
                 isValidEmail,
               ]"
+                           style="padding: 3px 0;"
                   />
                 </q-card-section>
-                <q-card-section class="q-pa-none q-ma-none">
-                  <q-input
-                    type="password"
-                    v-model="password"
-                    label="Пароль"
-                    lazy-rules
-                    standout
-                    :dense="true"
-                    :rules="[
+                <q-card-section class="q-pa-none">
+                  <q-input id="password-field" filled type="password" v-model="password" label="Пароль" lazy-rules dense class="q-pa-none"
+                           :rules="[
                 (val) =>
-                  (!!val && val.length >= 6 && val.length <= 20) ||
-                  'Пароль должен содержать от 6 до 20 символов',
+                  (!!val && val.length >= 6 && val.length <= 20),
               ]"
-
+                           style="padding: 3px 0;"
                   />
                 </q-card-section>
-                <q-card-section  class="q-px-none q-pt-none q-ma-none q-pb-md">
+                <q-card-section class="q-pt-md q-px-none">
                   <q-btn no-caps label="Войти" type="submit" color="primary" style="width: 100%"/>
+                </q-card-section>
+                <q-card-section v-if="errorMessage" style="text-align: center" class="q-pa-none q-pb-md">
+                  <span style="color: #ed4956;">{{errorMessage}}</span>
                 </q-card-section>
               </q-card>
             </q-form>
@@ -67,8 +56,9 @@
         </q-card>
       </div>
       <div class="col-4 q-pt-lg">
-        <q-card flat bordered >
-          <q-card-section class="q-py-sm q-px-md row justify-center" style="text-align: center; vertical-align: middle; display: table-cell;" >
+        <q-card flat bordered>
+          <q-card-section class="q-py-sm q-px-md row justify-center"
+                          style="text-align: center; vertical-align: middle; display: table-cell;">
             <span>Есть аккаунт?</span>
             <q-btn flat color="primary" :to="'/auth/login'" no-caps label="Войти"></q-btn>
           </q-card-section>
@@ -97,6 +87,7 @@ export default {
     const username = ref('');
     const password = ref('');
     const email = ref('');
+    const errorMessage = ref(null);
 
     const handleLogin = async (user) => {
       try {
@@ -120,12 +111,32 @@ export default {
       }
     }
 
+    const onValidError = (obj) => {
+      const label = obj.label;
+      switch (label) {
+        case 'Имя пользователя': {
+          errorMessage.value = 'Имя пользователя должно быть в пределах от 6 до 16 символов';
+          break;
+        }
+        case 'Email': {
+          errorMessage.value = 'Поле не может быть пустым';
+          break;
+        }
+        case 'Пароль': {
+          errorMessage.value = 'Пароль должен содержать от 6 до 20 символов';
+          break;
+        }
+      }
+    }
+
     return {
       username,
       email,
       password,
+      errorMessage,
       handleLogin,
-      isValidEmail
+      isValidEmail,
+      onValidError
     }
   }
 }

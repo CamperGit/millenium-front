@@ -10,35 +10,32 @@
             <q-form
               @submit="handleLogin({ username, password })"
               class="q-gutter-sm"
+              @validation-error="onValidError"
+              @validation-success="errorMessage = null"
             >
               <q-card flat class="q-pt-none">
                 <q-card-section class="q-ma-none q-px-none q-pt-none" style="padding-bottom: 2px;">
-                  <q-input standout v-model="username" label="Имя пользователя" :dense="true"
+                  <q-input filled v-model="username" label="Имя пользователя" dense
                            :rules="[
                        (val) =>
-                       (!!val && val.length >= 6 && val.length <= 16) ||
-                       'Имя пользователя должно быть в пределах от 6 до 16 символов',
+                       (!!val && val.length >= 6 && val.length <= 16)
                     ]"
                            style="padding: 5px 0;"/>
                 </q-card-section>
                 <q-card-section class="q-pa-none q-ma-none">
-                  <q-input
-                    type="password"
-                    v-model="password"
-                    label="Пароль"
-                    lazy-rules
-                    standout
-                    :dense="true"
+                  <q-input type="password" v-model="password" label="Пароль" lazy-rules filled dense
                     :rules="[
                 (val) =>
-                  (!!val && val.length >= 6 && val.length <= 20) ||
-                  'Пароль должен содержать от 6 до 20 символов',
+                  (!!val && val.length >= 6 && val.length <= 20)
               ]"
 
                   />
                 </q-card-section>
                 <q-card-section  class="q-px-none q-pt-none q-ma-none q-pb-md">
                   <q-btn no-caps label="Войти" type="submit" color="primary" style="width: 100%"/>
+                </q-card-section>
+                <q-card-section v-if="errorMessage" style="text-align: center" class="q-pa-none q-pb-md">
+                  <span style="color: #ed4956;">{{errorMessage}}</span>
                 </q-card-section>
               </q-card>
             </q-form>
@@ -75,6 +72,7 @@ export default {
 
     const username = ref('');
     const password = ref('');
+    const errorMessage = ref(null);
 
     const handleLogin = async (user) => {
       try {
@@ -98,10 +96,26 @@ export default {
       }
     }
 
+    const onValidError = (obj) => {
+      const label = obj.label;
+      switch (label) {
+        case 'Имя пользователя': {
+          errorMessage.value = 'Имя пользователя должно быть в пределах от 6 до 16 символов';
+          break;
+        }
+        case 'Пароль': {
+          errorMessage.value = 'Пароль должен содержать от 6 до 20 символов';
+          break;
+        }
+      }
+    }
+
     return {
       username,
       password,
+      errorMessage,
       handleLogin,
+      onValidError
     }
   }
 }
