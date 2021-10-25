@@ -13,11 +13,10 @@ class TeamService {
     }
   }
 
-  async getTeamById(name, id) {
+  async getTeamById(id) {
     const config = {
       params: {
-        number : id,
-        name
+        teamId : id,
       },
     }
     try {
