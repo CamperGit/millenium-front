@@ -75,9 +75,13 @@ export default defineComponent({
 
     onMounted(()=>{
       const currentUser = store.getters['auth/getCurrentUser'];
-      console.log(currentUser);
+      console.log('user after login: ' + JSON.stringify(currentUser));
       if (currentUser === null) {
         router.push("/auth/login");
+      }
+      const teams = currentUser.teamsIds;
+      if (!teams || teams.length === 0) {
+        router.push("/team/create");
       }
     })
 

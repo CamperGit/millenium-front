@@ -24,14 +24,18 @@ class TokenService {
   }
 
   setUser(user) {
-    localStorage.setItem("user", JSON.stringify({
+    console.log(user)
+    const object = JSON.stringify({
       username: user.username,
       email: user.email,
       tokenType: user.tokenType,
       accessToken: user.accessToken,
       refreshToken: user.refreshToken,
-      id : user.id
-    }));
+      id : user.id,
+      teamsIds : user.teamsIds
+    });
+    console.log(object)
+    localStorage.setItem("user", object);
   }
 
   removeUser() {

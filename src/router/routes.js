@@ -15,6 +15,13 @@ const routes = [
       { path: 'signup', component: () => import('pages/SignupPage') }
     ]
   },
+  {
+    path: '/team',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: 'create', component: () => import('pages/CreateTeamPage') },
+    ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it
