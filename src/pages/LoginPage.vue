@@ -84,6 +84,7 @@ export default {
           icon: "cloud_done",
           message: "Успешная авторизация",
         });
+
         await router.push("/");
       } catch (e) {
         message.value = e.response.data.message;

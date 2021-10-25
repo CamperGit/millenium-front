@@ -11,18 +11,19 @@
       </q-tabs>
       <q-separator/>
       <q-tab-panels v-model="teamPageTabs" class="q-pa-none q-ma-none">
-        <q-tab-panel name="create" class="q-pa-none q-ma-none" >
+        <q-tab-panel name="create" class="q-pa-none q-ma-none">
           <q-card style="width: 100%; height: 290px; background-color: white" flat class="q-pa-none q-ma-none">
             <q-card-section class="q-pt-md">
               <h6 class="q-pa-none q-ma-none">Введите название организации:</h6>
-              <q-input class="q-pt-sm" filled dense v-model="teamName" label="Название организации"/>
+              <q-input :disable="isTeamNameEnabled" class="q-pt-sm" filled dense v-model="teamName"
+                       label="Название организации"/>
             </q-card-section>
             <q-card-section class="q-py-none q-pt-sm q-px-md">
               <h6 class="q-pa-none q-ma-none">Выберите режим использования:</h6>
             </q-card-section>
             <q-card-section class="row justify-between">
-              <q-radio v-model="teamType" val="self" label="Для личного использования" />
-              <q-radio left-label v-model="teamType" val="team" label="Организация" />
+              <q-radio v-model="teamType" val="self" label="Для личного использования"/>
+              <q-radio v-model="teamType" val="team" label="Организация" left-label/>
             </q-card-section>
             <q-card-section>
               <q-btn @click="createNewTeam(teamName);" no-caps color="primary" style="width: 100%">Сохранить</q-btn>
@@ -31,7 +32,7 @@
         </q-tab-panel>
         <q-tab-panel name="join" class="q-pa-none">
           <q-card style="width: 100%; height: 290px; background-color: white" flat class="q-pa-none q-ma-none">
-            <q-card-section class="q-pt-md" >
+            <q-card-section class="q-pt-md">
               <h6 class="q-pa-none q-ma-none">Введите ссылку приглашение, чтобы присоединиться к организации:</h6>
               <q-input class="q-pt-sm" filled dense v-model="teamName" label="Пригласительная ссылка"/>
             </q-card-section>
@@ -62,13 +63,16 @@ export default {
   setup() {
     const router = useRouter();
     const store = useStore();
+    const isTeamNameEnabled = ref(false);
     const teamName = ref('');
-    const teamPageTabs = ref('join');
+    const teamPageTabs = ref('create');
     const teamType = ref('team');
+    const currentUser = store.getters["auth/getCurrentUser"];
 
-    const createNewTeam = (teamName) => {
-      const {data} = TeamService.createNewTeam(teamName);
-      console.log(data)
+    const createNewTeam = async (name) => {
+      console.log(currentUser)
+      const userId = currentUser.id;
+      await store.dispatch('teams/createNewTeam', {name, userId})
     }
 
     const getTeamById = async (teamName, customNumber) => {
@@ -77,13 +81,29 @@ export default {
       console.log(data)
     }
 
-    watch(teamPageTabs, (val)=> {
+    watch(teamType, (val) => {
+      console.log(val)
+      if (val === 'self') {
+        teamName.value = currentUser.username;
+        isTeamNameEnabled.value = true;
+      } else {
+        teamName.value = '';
+        isTeamNameEnabled.value = false;
+      }
+
+      onMounted( ()=> {
+        console.log(currentUser)
+         if (currentUser === null) {
+           router.push('/auth/login')
+         }
+      })
     })
 
     return {
       teamName,
       teamType,
       teamPageTabs,
+      isTeamNameEnabled,
       createNewTeam,
       getTeamById,
     }
@@ -96,7 +116,7 @@ q-tab__label {
   font-size: 25px;
 }
 
-.tabs-font-size{
+.tabs-font-size {
   font-size: 20px;
 }
 </style>
