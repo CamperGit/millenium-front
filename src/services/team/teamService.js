@@ -27,18 +27,6 @@ class TeamService {
       throw e
     }
   }
-
-  async testRequestBodyWithNumber(name, number) {
-
-    try {
-      return await api.post("/teams/test",{
-        name,
-        number
-      })
-    } catch (e) {
-      throw e
-    }
-  }
 }
 
 export default new TeamService();

@@ -49,6 +49,7 @@ export default boot(async ( { router, store} ) => {
 
   const currentUser = store.getters['auth/getCurrentUser'];
   if (currentUser) {
-    await store.dispatch('auth/loadUserInfoAction');
+    const data = await store.dispatch('auth/loadUserInfoAction');
+    console.log(data)
   }
 })

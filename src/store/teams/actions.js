@@ -1,4 +1,5 @@
 import TeamService from "src/services/team/teamService";
+import CategoryService from "src/services/expenses/CategoryService";
 
 export async function getTeamById ( {commit}, {teamId} ) {
   try {
@@ -18,6 +19,20 @@ export async function createNewTeam ( {commit}, {name, userId}) {
       return data;
     }
   } catch (e) {
+    console.log(e)
+    throw e;
+  }
+}
+
+export async function createNewCategory ({commit}, {name, teamId}) {
+  try {
+    const data = await CategoryService.createNewCategory(name, teamId);
+    if (data) {
+      commit('addCategory', data)
+      return data;
+    }
+  } catch (e) {
+    console.log(e)
     throw e;
   }
 }

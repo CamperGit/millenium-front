@@ -1,5 +1,7 @@
 export default function () {
   return {
-    currentTeam : {}
+    currentTeam : {},
+    categories : [],
+    teamLimit : 0,
   }
 }
