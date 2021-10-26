@@ -16,7 +16,7 @@
         <q-separator/>
         <q-card-section class="q-pa-none">
           <q-list padding class="text-primary">
-            <q-item clickable v-ripple :active="isCategorySelected('EMPTY')" active-class="categories-list-active">
+            <q-item clickable v-ripple :active="(selectedCategories && categories && selectedCategories.length === categories.length)" @click="selectAllCategories" active-class="categories-list-active">
               <q-item-section>Все</q-item-section>
               <q-space/>
               <q-item-section avatar>
@@ -40,6 +40,7 @@
         {{currentTeam.name}}
       </q-card>
     </q-card>
+
     <q-dialog v-model="addNewCategoryDialog" class="q-pa-none" position="standard">
       <q-card id="dialog-add-info-schedule" class="q-pa-sm"  style="width: 410px">
         <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
@@ -49,11 +50,12 @@
           <q-input v-model="categoryName" label="Название (15 символов)"/>
         </q-card-section>
         <q-card-actions class="justify-center q-mt-md">
-          <q-btn size="md" :disable="categoryName < 2 || categoryName.length > 15" style="width: 110px" no-caps color="primary" label="Добавить" @click="createNewCategory(categoryName)"/>
+          <q-btn size="md" :disable="categoryName < 2 || categoryName.length > 15" style="width: 110px" no-caps color="primary" label="Добавить" @click="createNewCategory(categoryName)" v-close-popup/>
           <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
         </q-card-actions>
       </q-card>
     </q-dialog>
+
   </q-page>
 </template>
 
@@ -98,7 +100,20 @@ export default defineComponent({
           selectedCategories.value.splice(index, 1);
         }
       } else {
-        selectedCategories.value.push(category);
+        if (selectedCategories.value.length === categories.value.length - 1) {
+          selectAllCategories();
+        } else {
+          selectedCategories.value.push(category);
+        }
+      }
+    }
+
+    const selectAllCategories = ()=> {
+      if (selectedCategories.value.length === categories.value.length) {
+        selectedCategories.value.splice(0, selectedCategories.value.length);
+      } else {
+        selectedCategories.value.splice(0, selectedCategories.value.length);
+        selectedCategories.value.push.apply(selectedCategories.value, categories.value);
       }
     }
 
@@ -127,6 +142,7 @@ export default defineComponent({
       isCategorySelected,
       addSelectedCategory,
       createNewCategory,
+      selectAllCategories
     }
   }
 })
