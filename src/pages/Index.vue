@@ -79,7 +79,7 @@ export default defineComponent({
       if (currentUser === null) {
         router.push("/auth/login");
       }
-      const teams = currentUser.teams;
+      const teams = currentUser?.teams;
       if (!teams || teams.length === 0) {
         router.push("/team/create");
       }

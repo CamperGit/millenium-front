@@ -1,22 +1,16 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+      <q-bar class="q-electron-drag">
+        <q-icon name="laptop_chromebook" />
+        <div>Millenium</div>
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+        <q-space />
 
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
+        <q-btn dense flat icon="minimize" @click="minimize" />
+        <q-btn dense flat icon="crop_square" @click="toggleMaximize" />
+        <q-btn dense flat icon="close" @click="closeApp" />
+      </q-bar>
     </q-header>
 
     <q-drawer
@@ -104,8 +98,26 @@ export default defineComponent({
 
   setup () {
     const leftDrawerOpen = ref(false)
+    function minimize () {
+      if (process.env.MODE === 'electron') {
+        window.myWindowAPI.minimize()
+      }
+    }
+
+    function toggleMaximize () {
+      if (process.env.MODE === 'electron') {
+        window.myWindowAPI.toggleMaximize()
+      }
+    }
+
+    function closeApp () {
+      if (process.env.MODE === 'electron') {
+        window.myWindowAPI.close()
+      }
+    }
 
     return {
+      minimize, toggleMaximize, closeApp,
       essentialLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer () {

@@ -14,8 +14,6 @@ export default boot(async ( { router, store} ) => {
     router.push("/auth/login");
   });
 
-  await store.dispatch('auth/loadUserInfoAction');
-
   api.interceptors.response.use(
     (res) => {
       return res;
@@ -48,4 +46,9 @@ export default boot(async ( { router, store} ) => {
       return Promise.reject(err);
     }
   );
+
+  const currentUser = store.getters['auth/getCurrentUser'];
+  if (currentUser) {
+    await store.dispatch('auth/loadUserInfoAction');
+  }
 })

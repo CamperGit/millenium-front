@@ -1,5 +1,8 @@
-import { app, BrowserWindow, nativeTheme } from 'electron'
+import { app, BrowserWindow, nativeTheme, Menu } from 'electron'
+import { initialize, enable } from '@electron/remote/main'
 import path from 'path'
+
+Menu.setApplicationMenu(null)
 
 try {
   if (process.platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {
@@ -10,6 +13,9 @@ try {
 let mainWindow
 
 function createWindow () {
+
+  initialize()
+
   /**
    * Initial window options
    */
@@ -17,6 +23,7 @@ function createWindow () {
     width: 1000,
     height: 600,
     useContentSize: true,
+    frame: false,
     webPreferences: {
       contextIsolation: true,
       nativeWindowOpen: false,
@@ -24,6 +31,8 @@ function createWindow () {
       preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD)
     }
   })
+
+  enable(mainWindow.webContents)
 
   mainWindow.loadURL(process.env.APP_URL)
 
