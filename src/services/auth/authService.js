@@ -24,7 +24,6 @@ class AuthService {
 
   async register(user) {
     try {
-      console.log(user)
       const {data} = await api.post("/auth/signup", {
         username: user.username,
         email: user.email,

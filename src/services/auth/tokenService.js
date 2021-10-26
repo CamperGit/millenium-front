@@ -24,7 +24,6 @@ class TokenService {
   }
 
   setUser(user) {
-    console.log(user)
     const object = JSON.stringify({
       username: user.username,
       email: user.email,
@@ -34,7 +33,6 @@ class TokenService {
       id : user.id,
       teamsIds : user.teamsIds
     });
-    console.log(object)
     localStorage.setItem("user", object);
   }
 

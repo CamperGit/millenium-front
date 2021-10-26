@@ -59,7 +59,6 @@ import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import {onMounted, ref, watch} from "vue";
 import TeamService from "src/services/team/teamService";
-import ProductService from "src/services/ProductService";
 
 export default {
   name: "CreateTeamPage",
@@ -117,7 +116,6 @@ export default {
     })
 
     onMounted(() => {
-      console.log(currentUser)
       if (currentUser === null) {
         router.push('/auth/login')
       }
