@@ -1,44 +1,60 @@
 <template>
   <q-page>
     <q-card flat square class="row" style="height: 100%">
-      <q-card id="category-card" square class="col-2">
-        <q-card-section class=" q-pa-none q-my-sm row">
-          <h6 class="q-px-none q-pl-md q-my-sm">Категории:</h6>
-          <q-space/>
-          <q-btn flat size="md" icon="add" @click="addNewCategoryDialog=true"></q-btn>
-        </q-card-section>
-        <!--          <q-separator/>
-            <q-card-section >
-                 <q-input label="Поиск категорий"></q-input>
-               </q-card-section>-->
-        <q-card-section class="q-pa-none">
-          <q-list class="text-primary q-pa-none">
-            <q-separator/>
-            <q-item clickable v-ripple
-                    :active="(selectedCategories && categories && selectedCategories.length === categories.length)"
-                    @click="selectAllCategories" class="q-py-sm categories-list-inactive" active-class="categories-list-active">
-              <q-item-section>Все</q-item-section>
-              <q-space/>
-              <q-item-section avatar>
-                <span class="category-count-icon">{{ numberOfExpenses }}</span>
-              </q-item-section>
-            </q-item>
-            <q-separator />
-            <template v-for="category of categories" :key="category">
-              <q-item clickable v-ripple :active="isCategorySelected(category.categoryId)"
-                      @click="addSelectedCategory(category)" class="categories-list-inactive" active-class="categories-list-active">
-                <q-item-section>{{ category.name === 'EMPTY' ? 'Без категории' : category.name}}</q-item-section>
+      <q-drawer
+        v-model="categoryDrawer"
+        elevated
+        class="q-pa-none q-ma-none q-mr-sm"
+        id="category-drawer"
+      >
+        <q-card flat style="height: 100%" square class="col-2">
+          <q-card-section class=" q-pa-none q-py-sm row">
+            <h6 class="q-px-none q-pl-md q-my-sm">Категории:</h6>
+            <q-space/>
+            <q-btn flat size="md" icon="add" @click="addNewCategoryDialog = true"></q-btn>
+          </q-card-section>
+          <!--          <q-separator/>
+              <q-card-section >
+                   <q-input label="Поиск категорий"></q-input>
+                 </q-card-section>-->
+          <q-card-section class="q-pa-none">
+            <q-list class="text-primary q-pa-none">
+              <q-separator/>
+              <q-item clickable v-ripple
+                      :active="(selectedCategories && categories && selectedCategories.length === categories.length)"
+                      @click="selectAllCategories" class="q-py-sm categories-list-inactive"
+                      active-class="categories-list-active">
+                <q-item-section>Все</q-item-section>
                 <q-space/>
                 <q-item-section avatar>
-                  <span class="category-count-icon">{{ category.expenses.length }}</span>
+                  <span class="category-count-icon">{{ numberOfExpenses }}</span>
                 </q-item-section>
               </q-item>
-            </template>
-          </q-list>
+              <q-separator/>
+              <template v-for="category of categories" :key="category">
+                <q-item clickable v-ripple :active="isCategorySelected(category.categoryId)"
+                        @click="addSelectedCategory(category)" class="categories-list-inactive"
+                        active-class="categories-list-active">
+                  <q-item-section>{{ category.name }}</q-item-section>
+                  <q-space/>
+                  <q-item-section avatar>
+                    <span class="category-count-icon">{{ category.expenses.length }}</span>
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-list>
+          </q-card-section>
+        </q-card>
+      </q-drawer>
+      <q-card flat square class="q-pa-md" style="height: 100%">
+        <q-card-section class="row q-pa-none q-ma-none"
+                        style="display: table-cell;vertical-align: middle;text-align: center;">
+          <q-btn style="width: 36px; height: 36px" @click="categoryDrawer = !categoryDrawer" flat icon="menu"></q-btn>
+          <span>{{ currentTeam.name }}</span>
         </q-card-section>
-      </q-card>
-      <q-card flat square class="col-auto" style="height: 100%">
-        {{ currentTeam.name }}
+        <q-card-section class="q-pa-none q-ma-none">
+          <q-btn label="Добавить" @click="createNewExpenseDialog = true"></q-btn>
+        </q-card-section>
       </q-card>
     </q-card>
 
@@ -58,14 +74,79 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog v-model="createNewExpenseDialog" class="q-pa-none" position="standard">
+      <q-card id="dialog-add-info-schedule" class="q-pa-sm" style="width: 410px">
+        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
+          <h6 class="q-pa-none q-my-sm">Добавление нового расхода:</h6>
+        </q-card-section>
+        <q-card-section class="q-mx-sm q-py-none">
+          <q-input v-model="expenseName" label="Название"/>
+        </q-card-section>
+        <q-card-section>
+          <q-input v-model="expenseDescription"></q-input>
+        </q-card-section>
+        <q-card-section>
+          <q-select v-model="expensePriority" label="Приоритет" :options="priorityOptions" emit-value
+                    map-options></q-select>
+        </q-card-section>
+        <q-card-section>
+          <q-select v-model="expenseCategory" :options="categories" option-label="name" option-value="categoryId"
+                    map-options emit-value label="Категория">
+          </q-select>
+        </q-card-section>
+        <q-card-section class="row justify-between">
+          <q-radio v-model="expensePriceType" val="fixed" label="Фиксированная сумма"/>
+          <q-radio v-model="expensePriceType" val="range" label="Диапазон"/>
+        </q-card-section>
+        <q-card-section v-if="expensePriceType === 'fixed'">
+          <q-input v-model="expenseFixedPrice" type="number" label="Фиксированная сумма"></q-input>
+        </q-card-section>
+        <q-card-section v-else class="row">
+          <q-input v-model="expenseMinPrice" type="number" label="От"></q-input>
+          <q-input v-model="expenseMaxPrice" type="number" label="До"></q-input>
+        </q-card-section>
+        <q-card-actions class="justify-center q-mt-md">
+          <q-btn size="md" :disable="!isExpenseValid" style="width: 110px" no-caps
+                 color="primary" label="Добавить"
+                 @click="createNewExpense({expenseName, expenseDescription, expensePriority, expenseCategory, expenseFixedPrice,
+                  expenseMinPrice, expenseMaxPrice, expensePriceType})" v-close-popup/>
+          <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
 <script>
-import {defineComponent, ref, computed, onMounted} from 'vue';
+import {defineComponent, ref, computed, onMounted, watch} from 'vue';
 import TeamService from "src/services/team/teamService";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex"
+
+
+const priorityOptions = [
+  {
+    label: 'Очень низкий',
+    value: 'VERY_LOW'
+  },
+  {
+    label: 'Низкий',
+    value: 'LOW'
+  },
+  {
+    label: 'Средний',
+    value: 'MEDIUM'
+  },
+  {
+    label: 'Высокий',
+    value: 'HIGH'
+  },
+  {
+    label: 'Очень высокий',
+    value: 'PRIMARY'
+  },
+]
 
 export default defineComponent({
   name: 'PageIndex',
@@ -74,6 +155,7 @@ export default defineComponent({
     const store = useStore();
     const currentTeam = ref({});
     const addNewCategoryDialog = ref(false);
+    const categoryDrawer = ref(true);
     const categoryName = ref('');
     const categories = ref([]);
     const selectedCategories = ref([]);
@@ -122,7 +204,7 @@ export default defineComponent({
       }
     }
 
-    const numberOfExpenses = computed(()=> {
+    const numberOfExpenses = computed(() => {
       if (categories.value) {
         let counter = 0;
         for (let category of categories.value) {
@@ -134,6 +216,34 @@ export default defineComponent({
       }
     })
 
+
+    const createNewExpenseDialog = ref(false);
+    const expenseName = ref('');
+    const expenseDescription = ref('');
+    const expensePriority = ref('MEDIUM');
+    const expenseCategory = ref(null);
+    const expenseFixedPrice = ref(0.0);
+    const expenseMinPrice = ref(0.0);
+    const expenseMaxPrice = ref(0.0);
+    const expensePriceType = ref('fixed');
+
+    const isExpenseValid = computed(() => {
+      let valid = expenseName.value.length > 2 && expenseName.value.length <= 50;
+      valid = valid && expenseDescription.value.length <= 1000;
+      valid = valid && expenseCategory.value !== null;
+      valid = valid && ((expensePriceType.value === 'range' && expenseMaxPrice.value - expenseMinPrice.value > 0)
+        || (expensePriceType.value === 'fixed' && expenseFixedPrice.value >= 0));
+      valid = valid && expenseMinPrice.value >= 0 && expenseMaxPrice.value >= 0;
+      return valid;
+    });
+
+    const createNewExpense = async (expense) => {
+      const data = await store.dispatch('teams/createNewExpense', expense);
+    }
+
+    watch(expenseCategory, (val) => {
+      console.log(val)
+    })
 
     onMounted(() => {
       const currentUser = store.getters['auth/getCurrentUser'];
@@ -158,19 +268,31 @@ export default defineComponent({
       categories,
       selectedCategories,
       numberOfExpenses,
+      categoryDrawer,
+      createNewExpenseDialog,
+      expenseName,
+      expenseDescription,
+      expensePriority,
+      expenseCategory,
+      expenseFixedPrice,
+      expenseMinPrice,
+      expenseMaxPrice,
+      priorityOptions,
+      isExpenseValid,
+      expensePriceType,
       isCategorySelected,
       addSelectedCategory,
       createNewCategory,
-      selectAllCategories
+      selectAllCategories,
+      createNewExpense
     }
   }
 })
 </script>
 <style scoped>
-#category-card {
+#category-drawer {
   background-color: #F0F2F4;
   box-shadow: rgba(0, 0, 0, 0.15) 2.4px 0 3.2px;
-  margin-right: 5px;
   min-width: 182px
 }
 
