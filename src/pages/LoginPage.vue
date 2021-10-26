@@ -77,15 +77,18 @@ export default {
     const handleLogin = async (user) => {
       try {
         const data = await store.dispatch("auth/loginAction", user);
-        console.log(data)
         $q.notify({
           color: "green-4",
           textColor: "white",
           icon: "cloud_done",
           message: "Успешная авторизация",
         });
-
-        await router.push("/");
+        const teams = data.teamsIds;
+        if (!teams || teams.length === 0) {
+          await router.push("/team/create");
+        } else {
+          await router.push("/");
+        }
       } catch (e) {
         message.value = e.response.data.message;
         $q.notify({

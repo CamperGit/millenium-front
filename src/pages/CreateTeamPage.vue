@@ -12,7 +12,7 @@
       <q-separator/>
       <q-tab-panels v-model="teamPageTabs" class="q-pa-none q-ma-none">
         <q-tab-panel name="create" class="q-pa-none q-ma-none">
-          <q-card style="width: 100%; height: 290px; background-color: white" flat class="q-pa-none q-ma-none">
+          <q-card style="width: 100%; background-color: white" flat class="q-pa-none q-ma-none">
             <q-card-section class="q-pt-md">
               <h6 class="q-pa-none q-ma-none">Введите название организации:</h6>
               <q-input :disable="isTeamNameEnabled" class="q-pt-sm" filled dense v-model="teamName"
@@ -28,16 +28,19 @@
             <q-card-section>
               <q-btn @click="createNewTeam(teamName);" no-caps color="primary" style="width: 100%">Сохранить</q-btn>
             </q-card-section>
+            <q-card-section v-if="errorMessage" style="text-align: center" class="q-pa-none q-pb-md">
+              <span style="color: #ed4956;">{{ errorMessage }}</span>
+            </q-card-section>
           </q-card>
         </q-tab-panel>
         <q-tab-panel name="join" class="q-pa-none">
-          <q-card style="width: 100%; height: 290px; background-color: white" flat class="q-pa-none q-ma-none">
+          <q-card style="width: 100%; background-color: white" flat class="q-pa-none q-ma-none">
             <q-card-section class="q-pt-md">
               <h6 class="q-pa-none q-ma-none">Введите ссылку приглашение, чтобы присоединиться к организации:</h6>
               <q-input class="q-pt-sm" filled dense v-model="teamName" label="Пригласительная ссылка"/>
             </q-card-section>
             <q-card-section class="q-pt-none">
-              <span>Вы будете добавлены в организацию только после просмотра одобрения администратором</span>
+              <span>Вы будете добавлены в организацию только после просмотра и одобрения вашей заявки администратором</span>
             </q-card-section>
             <q-card-section style="padding-top: 40px">
               <q-btn no-caps color="primary" style="width: 100%">Отправить заявку</q-btn>
@@ -64,25 +67,46 @@ export default {
     const router = useRouter();
     const store = useStore();
     const isTeamNameEnabled = ref(false);
+    const inviteUrl = ref('');
     const teamName = ref('');
     const teamPageTabs = ref('create');
     const teamType = ref('team');
     const currentUser = store.getters["auth/getCurrentUser"];
+    const errorMessage = ref(null);
 
     const createNewTeam = async (name) => {
-      console.log(currentUser)
-      const userId = currentUser.id;
-      await store.dispatch('teams/createNewTeam', {name, userId})
+      try {
+        const userId = currentUser.id;
+        const data = await store.dispatch('teams/createNewTeam', {name, userId});
+        if (data) {
+          console.log(data.teamId)
+          const teamsBefore = currentUser.teams.length;
+          await store.dispatch('auth/addTeamAction', data)
+          const teamsAfter = currentUser.teams.length;
+          if (teamsBefore === teamsAfter) {
+            throw new Error('Ошибка добавления команды пользователю');
+          } else {
+            await router.push('/')
+          }
+        } else {
+          throw new Error('Ошибка при создании организации');
+        }
+      } catch (e) {
+        errorMessage.value = 'Ошибка при создании организации';
+        console.log(e)
+      }
+
     }
 
     const getTeamById = async (teamName, customNumber) => {
       const {data} = await TeamService.getTeamById(teamName, customNumber);
-      console.log(TeamService.getTeamById(teamName, customNumber))
-      console.log(data)
     }
 
+    watch(teamPageTabs, (val) => {
+      errorMessage.value = null;
+    })
+
     watch(teamType, (val) => {
-      console.log(val)
       if (val === 'self') {
         teamName.value = currentUser.username;
         isTeamNameEnabled.value = true;
@@ -90,13 +114,13 @@ export default {
         teamName.value = '';
         isTeamNameEnabled.value = false;
       }
+    })
 
-      onMounted( ()=> {
-        console.log(currentUser)
-         if (currentUser === null) {
-           router.push('/auth/login')
-         }
-      })
+    onMounted(() => {
+      console.log(currentUser)
+      if (currentUser === null) {
+        router.push('/auth/login')
+      }
     })
 
     return {
@@ -104,6 +128,8 @@ export default {
       teamType,
       teamPageTabs,
       isTeamNameEnabled,
+      errorMessage,
+      inviteUrl,
       createNewTeam,
       getTeamById,
     }

@@ -97,17 +97,20 @@ export default {
           username: user.username,
           password: user.password
         });
-        console.log("loginData: " + loginData.data);
         $q.notify({
           color: "green-4",
           textColor: "white",
           icon: "cloud_done",
           message: "Успешная регистрация",
         });
-        await router.push("/");
+        const teams = loginData.teamsIds;
+        if (!teams || teams.length === 0) {
+          await router.push("/team/create");
+        } else {
+          await router.push("/");
+        }
       } catch (e) {
         errorMessage.value = e?.response?.data?.message;
-        console.log(e)
         $q.notify({
           color: "red-5",
           textColor: "white",

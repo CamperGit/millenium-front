@@ -21,3 +21,10 @@ export function registerFailureMutation(state) {
   state.loggedIn = false;
 }
 
+export function addTeamToUser(state, team) {
+  state.user.teams.push(team);
+}
+
+export function loadUserInfo(state, info) {
+  state.user = {...state.user, teams : info.teams, roles : info.roles}
+}

@@ -13,8 +13,10 @@ export async function getTeamById ( {commit}, {teamId} ) {
 export async function createNewTeam ( {commit}, {name, userId}) {
   try {
     const data = await TeamService.createNewTeam(name, userId);
-    commit('setCurrentTeam', data)
-    return data;
+    if (data) {
+      commit('setCurrentTeam', data)
+      return data;
+    }
   } catch (e) {
     throw e;
   }
