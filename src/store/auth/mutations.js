@@ -25,6 +25,12 @@ export function addTeamToUser(state, team) {
   state.user.teams.push(team);
 }
 
+export function refreshTokensMutation(state, accessToken, refreshToken) {
+  state.loggedIn = true
+  state.user = {...state.user, accessToken, refreshToken}
+}
+
+
 export function loadUserInfo(state, info) {
   state.user = {...state.user, teams : info.teams, roles : info.roles}
 }

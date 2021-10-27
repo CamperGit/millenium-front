@@ -23,7 +23,7 @@ class ExpenseService {
         fixedPrice,
         minPrice,
         maxPrice
-      }, {});
+      }, {headers: authHeader()});
       return data;
     } catch (e) {
       throw e

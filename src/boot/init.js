@@ -22,10 +22,13 @@ export default boot(async ( { router, store} ) => {
       const originalConfig = err.config;
       if (originalConfig.url === "/auth/refreshtoken" && err.response) {
         //How refresh token was expired, we need to logout user from system (maybe router push to login page)
-        if (err.response.status === 403 && !originalConfig._retry) {
-          originalConfig._retry = true;
-          EventBus.dispatch("logout");
-          return api(originalConfig);
+        if (err.response.status === 403) {
+          if (originalConfig._retry) {
+            EventBus.dispatch("logout");
+          } else {
+            originalConfig._retry = true;
+            return api(originalConfig);
+          }
         }
       }
       if (originalConfig.url !== "/auth/signin" && err.response) {
@@ -47,9 +50,17 @@ export default boot(async ( { router, store} ) => {
     }
   );
 
-  const currentUser = store.getters['auth/getCurrentUser'];
-  if (currentUser) {
-    const data = await store.dispatch('auth/loadUserInfoAction');
-    console.log(data)
+  try {
+    const currentUser = store.getters['auth/getCurrentUser'];
+    if (currentUser) {
+      const data = await store.dispatch('auth/loadUserInfoAction');
+      console.log(data)
+    } else {
+      EventBus.dispatch("logout");
+    }
+  } catch (e) {
+    EventBus.dispatch("logout");
+    console.log(e);
   }
+
 })

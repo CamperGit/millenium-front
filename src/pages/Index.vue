@@ -245,19 +245,26 @@ export default defineComponent({
       console.log(val)
     })
 
-    onMounted(() => {
+    onMounted(async () => {
       const currentUser = store.getters['auth/getCurrentUser'];
       if (currentUser === null) {
-        router.push("/auth/login");
+        await router.push("/auth/login");
       }
       const teams = currentUser?.teams;
-      if (!teams || teams.length === 0) {
-        router.push("/team/create");
-      }
-      if (teams.length === 1) {
-        store.commit('teams/setCurrentTeam', teams[0]);
-        currentTeam.value = store.getters['teams/getCurrentTeam'];
-        categories.value = store.getters['teams/getTeamCategories'];
+      if (teams && teams.length !== 0) {
+        if (teams.length === 1) {
+          store.commit('teams/setCurrentTeam', teams[0]);
+          currentTeam.value = store.getters['teams/getCurrentTeam'];
+          categories.value = store.getters['teams/getTeamCategories'];
+        } else {
+          if (teams.length === 1) {
+            store.commit('teams/setCurrentTeam', teams[0]);
+            currentTeam.value = store.getters['teams/getCurrentTeam'];
+            categories.value = store.getters['teams/getTeamCategories'];
+          }
+        }
+      } else {
+        await router.push("/team/create");
       }
     })
 

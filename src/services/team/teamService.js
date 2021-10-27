@@ -1,4 +1,5 @@
 import {api} from "boot/axios"
+import authHeader from "src/services/auth/authHeader";
 
 class TeamService {
   async createNewTeam(name, userId) {
@@ -8,6 +9,7 @@ class TeamService {
           name,
           userId
         },
+        headers: authHeader()
       });
       return data;
     } catch (e) {

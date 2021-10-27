@@ -9,6 +9,7 @@ class CategoryService {
           name,
           teamId
         },
+        headers: authHeader()
       });
       return data;
     } catch (e) {

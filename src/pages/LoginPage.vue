@@ -83,11 +83,11 @@ export default {
           icon: "cloud_done",
           message: "Успешная авторизация",
         });
-        const teams = data.teamsIds;
-        if (!teams || teams.length === 0) {
-          await router.push("/team/create");
-        } else {
+        const teams = data?.teams;
+        if (teams && teams.length !== 0) {
           await router.push("/");
+        } else {
+          await router.push("/team/create");
         }
       } catch (e) {
         message.value = e.response.data.message;

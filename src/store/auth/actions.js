@@ -37,7 +37,12 @@ export function addTeamAction({commit}, team) {
 }
 
 export async function loadUserInfoAction({commit}) {
-  const data = await AuthService.loadUserInfo();
-  commit('loadUserInfo', data);
-  return data;
+  try {
+    const data = await AuthService.loadUserInfo();
+    commit('loadUserInfo', data);
+    return data;
+  } catch (e) {
+    throw e;
+  }
+
 }
