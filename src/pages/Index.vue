@@ -276,12 +276,11 @@ export default defineComponent({
           store.commit('teams/setCurrentTeam', teams[0]);
           currentTeam.value = store.getters['teams/getCurrentTeam'];
           categories.value = store.getters['teams/getTeamCategories'];
+          selectedCategories.value.push.apply(selectedCategories.value, categories.value);
         } else {
-          if (teams.length === 1) {
-            store.commit('teams/setCurrentTeam', teams[0]);
-            currentTeam.value = store.getters['teams/getCurrentTeam'];
-            categories.value = store.getters['teams/getTeamCategories'];
-          }
+          store.commit('teams/setCurrentTeam', teams[0]);
+          currentTeam.value = store.getters['teams/getCurrentTeam'];
+          categories.value = store.getters['teams/getTeamCategories'];
         }
       } else {
         await router.push("/team/create");
