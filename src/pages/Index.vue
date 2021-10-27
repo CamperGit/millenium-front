@@ -59,7 +59,6 @@
           <q-table
             title="Treats"
             :rows="selectedExpenses"
-            :columns="columns"
             row-key="name"
           />
         </q-card-section>
@@ -131,6 +130,8 @@ import {defineComponent, ref, computed, onMounted, watch} from 'vue';
 import TeamService from "src/services/team/teamService";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex"
+import {addHandler} from "boot/websocket";
+import CategoryService from "src/services/expenses/CategoryService";
 
 
 const priorityOptions = [
@@ -169,7 +170,7 @@ export default defineComponent({
     const selectedCategories = ref([]);
 
     const createNewCategory = async (name) => {
-      await store.dispatch('teams/createNewCategory', {name, teamId: currentTeam.value.teamId})
+      await CategoryService.createNewCategory(name, currentTeam.value.teamId);
     }
 
     const isCategorySelected = (id) => {
@@ -285,6 +286,11 @@ export default defineComponent({
       } else {
         await router.push("/team/create");
       }
+
+      addHandler(category => {
+        console.log(category)
+        store.commit('teams/addCategory', category)
+      })
     })
 
     return {
