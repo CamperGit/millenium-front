@@ -15,7 +15,9 @@ export function addCategory(state, category) {
 
 export function addExpense(state, expense) {
   for (let category of state.categories) {
-    console.log(category)
-    console.log(expense)
+    if (category.categoryId === expense.category.categoryId) {
+      category.expenses.push(expense);
+      break;
+    }
   }
 }

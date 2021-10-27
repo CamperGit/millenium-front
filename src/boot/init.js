@@ -27,8 +27,8 @@ export default boot(async ( { router, store} ) => {
             EventBus.dispatch("logout");
           } else {
             originalConfig._retry = true;
-            return api(originalConfig);
           }
+          return api(originalConfig);
         }
       }
       if (originalConfig.url !== "/auth/signin" && err.response) {
@@ -54,7 +54,6 @@ export default boot(async ( { router, store} ) => {
     const currentUser = store.getters['auth/getCurrentUser'];
     if (currentUser) {
       const data = await store.dispatch('auth/loadUserInfoAction');
-      console.log(data)
     } else {
       EventBus.dispatch("logout");
     }

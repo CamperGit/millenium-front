@@ -55,6 +55,14 @@
         <q-card-section class="q-pa-none q-ma-none">
           <q-btn label="Добавить" @click="createNewExpenseDialog = true"></q-btn>
         </q-card-section>
+        <q-card-section>
+          <q-table
+            title="Treats"
+            :rows="selectedExpenses"
+            :columns="columns"
+            row-key="name"
+          />
+        </q-card-section>
       </q-card>
     </q-card>
 
@@ -237,11 +245,23 @@ export default defineComponent({
       return valid;
     });
 
+    const selectedExpenses = computed(()=> {
+      if (selectedCategories.value && selectedCategories.value.length !== 0) {
+        let resultArray = [];
+        for (let category of selectedCategories.value) {
+          resultArray.push.apply(resultArray, category.expenses);
+        }
+        return resultArray;
+      } else {
+        return [];
+      }
+    })
+
     const createNewExpense = async (expense) => {
       const data = await store.dispatch('teams/createNewExpense', expense);
     }
 
-    watch(expenseCategory, (val) => {
+    watch(selectedExpenses, (val) => {
       console.log(val)
     })
 
@@ -287,6 +307,7 @@ export default defineComponent({
       priorityOptions,
       isExpenseValid,
       expensePriceType,
+      selectedExpenses,
       isCategorySelected,
       addSelectedCategory,
       createNewCategory,
