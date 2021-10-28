@@ -1,6 +1,5 @@
 import { api } from "boot/axios";
 import TokenService from "./tokenService";
-import authHeader from "src/services/auth/authHeader";
 
 class AuthService {
   async login(user) {
@@ -9,17 +8,10 @@ class AuthService {
         username: user.username,
         password: user.password
       });
-      if (data.accessToken) {
-        TokenService.setUser(data)
-      }
       return data;
     } catch (e) {
       throw e;
     }
-  }
-
-  logout() {
-    TokenService.removeUser();
   }
 
   async register(user) {
@@ -37,7 +29,7 @@ class AuthService {
 
   async loadUserInfo() {
     try {
-      const {data} = await api.get("/auth/info", {headers: authHeader()})
+      const {data} = await api.get("/auth/info",{})
       return data;
     } catch (e) {
       throw e;

@@ -1,5 +1,4 @@
 import {api} from "boot/axios"
-import authHeader from "src/services/auth/authHeader";
 
 class ExpenseService {
   async createNewExpense(expense) {
@@ -23,7 +22,7 @@ class ExpenseService {
         fixedPrice,
         minPrice,
         maxPrice
-      }, {headers: authHeader()});
+      }, {});
       return data;
     } catch (e) {
       throw e

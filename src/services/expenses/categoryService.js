@@ -1,5 +1,4 @@
 import {api} from "boot/axios"
-import authHeader from "src/services/auth/authHeader";
 import {stompClient} from "boot/websocket";
 import {StompHeaders} from "@stomp/stompjs";
 
@@ -26,7 +25,7 @@ class CategoryService {
     try {
       const {data} = await api.put("/categories",{
         lessonsToChange,
-      },{headers: authHeader()});
+      });
       return data;
     } catch (e) {
       throw e;
@@ -35,7 +34,7 @@ class CategoryService {
 
   async deleteCategoryById(categoryId) {
     try {
-      await api.delete("/categories/" + categoryId,{headers: authHeader()});
+      await api.delete("/categories/" + categoryId);
     } catch (e) {
       throw e;
     }

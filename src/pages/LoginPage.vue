@@ -76,21 +76,26 @@ export default {
 
     const handleLogin = async (user) => {
       try {
-        const data = await store.dispatch("auth/loginAction", user);
+        const isLoginSuccess = await store.dispatch("auth/loginAction", user);
         $q.notify({
           color: "green-4",
           textColor: "white",
           icon: "cloud_done",
           message: "Успешная авторизация",
         });
-        const teams = data?.teams;
-        if (teams && teams.length !== 0) {
-          await router.push("/");
+        if (isLoginSuccess) {
+          const currentUser = store.getters['auth/getCurrentUser'];
+          const teams = currentUser.teams;
+          if (!teams || teams.length === 0) {
+            await router.push("/team/create");
+          } else {
+            await router.push("/");
+          }
         } else {
-          await router.push("/team/create");
+          errorMessage.value = 'Ошибка авторизации'
         }
       } catch (e) {
-        message.value = e.response.data.message;
+        let message = e.response.data.message;
         $q.notify({
           color: "red-5",
           textColor: "white",

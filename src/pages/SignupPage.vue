@@ -91,23 +91,30 @@ export default {
 
     const handleRegister = async (user) => {
       try {
-        const {data} = await store.dispatch("auth/registerAction", user);
-        errorMessage.value = data;
-        const loginData = await store.dispatch("auth/loginAction", {
-          username: user.username,
-          password: user.password
-        });
-        $q.notify({
-          color: "green-4",
-          textColor: "white",
-          icon: "cloud_done",
-          message: "Успешная регистрация",
-        });
-        const teams = loginData.teamsIds;
-        if (!teams || teams.length === 0) {
-          await router.push("/team/create");
-        } else {
-          await router.push("/");
+        const isRegisterSuccess = await store.dispatch("auth/registerAction", user);
+        if (isRegisterSuccess) {
+          const isLoginSuccess = await store.dispatch("auth/loginAction", {
+            username: user.username,
+            password: user.password
+          });
+          if (isLoginSuccess) {
+            $q.notify({
+              color: "green-4",
+              textColor: "white",
+              icon: "cloud_done",
+              message: "Успешная регистрация",
+            });
+
+            const currentUser = store.getters['auth/getCurrentUser'];
+            const teams = currentUser.teams;
+            if (!teams || teams.length === 0) {
+              await router.push("/team/create");
+            } else {
+              await router.push("/");
+            }
+          } else {
+            await router.push("/auth/login");
+          }
         }
       } catch (e) {
         errorMessage.value = e?.response?.data?.message;

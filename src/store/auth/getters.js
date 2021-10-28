@@ -3,5 +3,13 @@ export function getCurrentUser (state) {
 }
 
 export function isLogged (state) {
-  return state.loggedIn;
+  return !!state.user;
+}
+
+export function getAccessToken (state) {
+  return state.accessToken;
+}
+
+export function getRefreshToken (state) {
+  return state.refreshToken;
 }

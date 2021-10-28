@@ -1,7 +1,6 @@
 import { boot } from 'quasar/wrappers'
 import SockJS from 'sockjs-client'
 import {Stomp} from '@stomp/stompjs'
-import authHeader from "src/services/auth/authHeader";
 
 let stompClient = null;
 const handlers = [];
@@ -10,15 +9,18 @@ export function addHandler(handler) {
   handlers.push(handler);
 }
 
-export function connect(user) {
+export function connect(token) {
   const socket = new SockJS('http://localhost:8080/ws');
   stompClient = Stomp.over(socket);
-  if (user !== null) {
-    const accessToken = user.accessToken;
+  let accessToken = '';
+  if (token !== null) {
+    accessToken = 'Bearer ' + token;
     console.log(accessToken)
   }
-  stompClient.connect(authHeader(), frame => {
+
+  stompClient.connect({ Authorization: accessToken}, frame => {
     console.log('Connected: ' + frame);
+
     stompClient.subscribe('/topic/categories', category => {
       console.log(category)
       console.log(handlers)
@@ -37,9 +39,9 @@ function disconnect() {
 }
 
 export default boot(async ( {store} ) => {
-  const currentUser = store.getters['auth/getCurrentUser'];
-  if (currentUser) {
-    connect(currentUser);
+  const accessToken = store.getters['auth/getAccessToken'];
+  if (accessToken) {
+    connect(accessToken.token);
   }
 })
 

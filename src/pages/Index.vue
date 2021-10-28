@@ -268,12 +268,17 @@ export default defineComponent({
 
     onMounted(async () => {
       const currentUser = store.getters['auth/getCurrentUser'];
-      if (currentUser === null) {
-        await router.push("/auth/login");
+      const accessToken = store.getters['auth/getAccessToken'];
+      if (currentUser && accessToken) {
+        console.log(1)
+        connect(accessToken.token);
+        console.log(2)
       } else {
-        connect(currentUser);
+        await router.push("/auth/login");
       }
+      console.log(currentUser)
       const teams = currentUser?.teams;
+      console.log(teams)
       if (teams && teams.length !== 0) {
         if (teams.length === 1) {
           store.commit('teams/setCurrentTeam', teams[0]);
