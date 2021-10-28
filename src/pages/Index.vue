@@ -130,7 +130,7 @@ import {defineComponent, ref, computed, onMounted, watch} from 'vue';
 import TeamService from "src/services/team/teamService";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex"
-import {addHandler} from "boot/websocket";
+import {addHandler, connect} from "boot/websocket";
 import CategoryService from "src/services/expenses/CategoryService";
 
 
@@ -270,6 +270,8 @@ export default defineComponent({
       const currentUser = store.getters['auth/getCurrentUser'];
       if (currentUser === null) {
         await router.push("/auth/login");
+      } else {
+        connect(currentUser);
       }
       const teams = currentUser?.teams;
       if (teams && teams.length !== 0) {

@@ -1,10 +1,11 @@
 import {api} from "boot/axios"
 import authHeader from "src/services/auth/authHeader";
 import {stompClient} from "boot/websocket";
+import {StompHeaders} from "@stomp/stompjs";
 
 class CategoryService {
   async createNewCategory(name, teamId) {
-    stompClient.send("/app/createCategory", JSON.stringify(authHeader()), JSON.stringify({name, teamId}));
+    stompClient.send("/app/createCategory",{} , JSON.stringify({name, teamId}));
   }
 
   async getCategoryById(id) {
