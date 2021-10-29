@@ -276,7 +276,9 @@ export default defineComponent({
       } else {
         await router.push("/auth/login");
       }
+      console.log(currentUser)
       const teams = currentUser?.teams;
+      console.log(teams)
       if (teams && teams.length !== 0) {
         if (teams.length === 1) {
           store.commit('teams/setCurrentTeam', teams[0]);

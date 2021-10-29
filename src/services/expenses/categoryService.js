@@ -1,10 +1,10 @@
 import {api} from "boot/axios"
-import {addHandler, stompClient} from "src/services/other/websocket";
+import {stompClient} from "src/services/other/websocket";
 import {StompHeaders} from "@stomp/stompjs";
 
 class CategoryService {
   async createNewCategory(name, teamId) {
-    stompClient.send("/app/createCategory",{} , JSON.stringify({name, teamId}));
+    stompClient.send("/millenium/createCategory",{} , JSON.stringify({name, teamId}));
   }
 
   async getCategoryById(id) {

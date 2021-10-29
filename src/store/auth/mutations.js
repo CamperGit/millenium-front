@@ -1,3 +1,5 @@
+import {disconnect} from "src/services/other/websocket";
+
 export function logoutMutation(state) {
   state.loggedIn = false;
   state.user = null;
@@ -6,6 +8,7 @@ export function logoutMutation(state) {
   localStorage.removeItem("user");
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+  disconnect();
 }
 
 export function setUser(state, user) {
