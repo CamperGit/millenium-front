@@ -276,20 +276,13 @@ export default defineComponent({
       } else {
         await router.push("/auth/login");
       }
-      console.log(currentUser)
       const teams = currentUser?.teams;
-      console.log(teams)
       if (teams && teams.length !== 0) {
-        if (teams.length === 1) {
-          store.commit('teams/setCurrentTeam', teams[0]);
-          currentTeam.value = store.getters['teams/getCurrentTeam'];
-          categories.value = store.getters['teams/getTeamCategories'];
-          selectedCategories.value.push.apply(selectedCategories.value, categories.value);
-        } else {
-          store.commit('teams/setCurrentTeam', teams[0]);
-          currentTeam.value = store.getters['teams/getCurrentTeam'];
-          categories.value = store.getters['teams/getTeamCategories'];
-        }
+        store.commit('teams/setCurrentTeam', teams[0]); // TODO: add team selecting
+        currentTeam.value = store.getters['teams/getCurrentTeam'];
+        categories.value = store.getters['teams/getTeamCategories'];
+        selectedCategories.value.push.apply(selectedCategories.value, categories.value);
+        await store.dispatch('teams/getUserPermissionInTeam', {userId : currentUser.id, teamId : currentTeam.value.teamId})
       } else {
         await router.push("/team/create");
       }

@@ -21,3 +21,9 @@ export function addExpense(state, expense) {
     }
   }
 }
+
+export function setPermissions(state, permissions) {
+  if (permissions) {
+    state.permissions = permissions;
+  }
+}
