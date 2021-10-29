@@ -3,12 +3,12 @@ import {api, axios} from "boot/axios";
 import EventBus from "src/common/eventBus";
 import TokenService from "../services/auth/tokenService"
 import {isTokenExpired} from "../services/auth/tokenService"
+import {connect} from "src/services/other/websocket";
 /** TODO aboba */
 // "async" is optional;
 // more info on params: https://v2.quasar.dev/quasar-cli/boot-files
 export default boot(async ( { router, store} ) => {
   // something to do
-
   let userFromStorage = await JSON.parse(localStorage.getItem('user'));
   let accessTokenFromStorage = await JSON.parse(localStorage.getItem('accessToken'));
   let refreshTokenFromStorage = await JSON.parse(localStorage.getItem('refreshToken'))
@@ -77,7 +77,9 @@ export default boot(async ( { router, store} ) => {
 
   try {
     const currentUser = store.getters['auth/getCurrentUser'];
-    if (currentUser) {
+    const accessToken = store.getters['auth/getAccessToken'];
+    if (currentUser && accessToken) {
+      connect(accessToken);
       const data = await store.dispatch('auth/loadUserInfoAction');
     } else {
       EventBus.dispatch("logout");

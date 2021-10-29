@@ -1,5 +1,5 @@
 import {api} from "boot/axios"
-import {stompClient} from "boot/websocket";
+import {addHandler, stompClient} from "src/services/other/websocket";
 import {StompHeaders} from "@stomp/stompjs";
 
 class CategoryService {

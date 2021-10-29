@@ -130,7 +130,7 @@ import {defineComponent, ref, computed, onMounted, watch} from 'vue';
 import TeamService from "src/services/team/teamService";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex"
-import {addHandler, connect} from "boot/websocket";
+import {addHandler, connect, isConnected} from "src/services/other/websocket";
 import CategoryService from "src/services/expenses/CategoryService";
 
 
@@ -263,22 +263,20 @@ export default defineComponent({
     }
 
     watch(selectedExpenses, (val) => {
-      console.log(val)
+      //console.log(val)
     })
 
     onMounted(async () => {
       const currentUser = store.getters['auth/getCurrentUser'];
       const accessToken = store.getters['auth/getAccessToken'];
       if (currentUser && accessToken) {
-        console.log(1)
-        connect(accessToken.token);
-        console.log(2)
+        if (!isConnected()) {
+          connect(accessToken);
+        }
       } else {
         await router.push("/auth/login");
       }
-      console.log(currentUser)
       const teams = currentUser?.teams;
-      console.log(teams)
       if (teams && teams.length !== 0) {
         if (teams.length === 1) {
           store.commit('teams/setCurrentTeam', teams[0]);
@@ -293,11 +291,6 @@ export default defineComponent({
       } else {
         await router.push("/team/create");
       }
-
-      addHandler(category => {
-        console.log(category)
-        store.commit('teams/addCategory', category)
-      })
     })
 
     return {
