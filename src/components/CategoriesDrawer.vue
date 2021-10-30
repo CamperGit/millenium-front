@@ -126,7 +126,6 @@ export default {
     const isCanCreate = computed(() => store.getters['teams/getCreatePermission']);
     const isCanUpdate = computed(() => store.getters['teams/getChangingPermission']);
     const isCanDeleting = computed(() => store.getters['teams/getDeletingPermission']);
-    const isCanModerating = computed(() => store.getters['teams/getModeratingPermission']);
 
     const currentTeam = computed(()=> store.getters['teams/getCurrentTeam']);
     const categories = computed(() => store.getters['teams/getTeamCategories'])
@@ -192,6 +191,7 @@ export default {
 
     const deleteCategory = (mode) => {
       CategoryService.deleteCategory({id: categoryEditId.value, deleteExpenses: mode === 'delete'})
+      editCategoryDialog.value = false;
     }
 
 

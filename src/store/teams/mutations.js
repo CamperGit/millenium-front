@@ -3,7 +3,7 @@ import {getCategoryIndex} from "src/services/expenses/categoryService";
 export function setCurrentTeam(state, team) {
   state.currentTeam = team;
   state.categories = team.categories;
-  state.selectedCategories = state.categories;
+  state.selectedCategories.push.apply(state.selectedCategories, state.categories);
 }
 
 export function updateCategories(state, newCategory) {
