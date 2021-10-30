@@ -77,9 +77,7 @@ export default boot(async ( { router, store} ) => {
 
   try {
     const currentUser = store.getters['auth/getCurrentUser'];
-    const accessToken = store.getters['auth/getAccessToken'];
-    if (currentUser && accessToken) {
-      connect(accessToken);
+    if (currentUser) {
       const data = await store.dispatch('auth/loadUserInfoAction');
     } else {
       EventBus.dispatch("logout");

@@ -169,8 +169,9 @@ import {defineComponent, ref, computed, onMounted, watch} from 'vue';
 import TeamService from "src/services/team/teamService";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex"
-import {addHandler, connect, isConnected} from "src/services/other/websocket";
+import { connect, isConnected} from "src/services/other/websocket";
 import CategoryService from "src/services/expenses/CategoryService";
+import ExpensesService from "src/services/expenses/expenseService";
 
 const priorityOptions = [
   {
@@ -322,11 +323,11 @@ export default defineComponent({
     })
 
     const createNewExpense = async (expense) => {
-      const data = await store.dispatch('teams/createNewExpense', expense);
+      ExpensesService.createNewExpense(expense);
     }
 
     watch(selectedExpenses, (val) => {
-      //console.log(val)
+      console.log(val)
     })
 
     onMounted(async () => {
@@ -334,6 +335,7 @@ export default defineComponent({
       const accessToken = store.getters['auth/getAccessToken'];
       if (currentUser && accessToken) {
         if (!isConnected()) {
+          console.log('connect')
           connect(accessToken);
         }
       } else {

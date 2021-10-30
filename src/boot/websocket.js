@@ -9,19 +9,23 @@ export default boot(async ({store}) => {
   addSubscription({
     name: '/user/queue/categoriesUpdating', callback: (category) => {
       const value = JSON.parse(category.body);
-      console.log(value)
-      console.log('changedAlLOOOOOOOOO')
       store.commit('teams/updateCategories', value)
     }
   });
   addSubscription({
     name: '/user/queue/deletedCategories', callback: (category) => {
-      //console.log(category);
       const value = JSON.parse(category.body);
-      console.log(value)
-      console.log("DELETED ALLLLLLLLLLLLOOO")
       store.commit('teams/deleteCategory', value.deletedCategory)
       store.commit('teams/updateCategories', value.emptyCategory)
+    }
+  });
+
+  addSubscription({
+    name: '/user/queue/expensesUpdating', callback: (category) => {
+      const value = JSON.parse(category.body);
+      store.commit('teams/updateExpenses', value);
+      //store.commit('teams/deleteCategory', value.deletedCategory)
+      //store.commit('teams/updateCategories', value.emptyCategory)
     }
   });
 

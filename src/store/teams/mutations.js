@@ -19,11 +19,14 @@ export function deleteCategory(state, deletedCategory) {
   state.categories.splice(index, 1);
 }
 
-export function addExpense(state, expense) {
-  for (let category of state.categories) {
-    if (category.categoryId === expense.category.categoryId) {
-      category.expenses.push(expense);
-      break;
+export function updateExpenses(state, expense) {
+  console.log(expense)
+  if (expense) {
+    for (let category of state.categories) {
+      if (category.categoryId === expense.category.categoryId) {
+        category.expenses.push(expense);
+        break;
+      }
     }
   }
 }

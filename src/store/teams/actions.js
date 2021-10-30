@@ -30,7 +30,6 @@ export async function createNewExpense ({commit}, expense) {
   try {
     const data = await ExpenseService.createNewExpense(expense);
     if (data) {
-      commit('addExpense', data)
       return data;
     }
   } catch (e) {
