@@ -1,52 +1,7 @@
 <template>
   <q-page>
+    <categories-drawer :is-showed="categoryDrawer"/>
     <q-card flat square class="row" style="height: 100%">
-      <q-drawer
-        v-model="categoryDrawer"
-        elevated
-        class="q-pa-none q-ma-none q-mr-sm"
-        id="category-drawer"
-      >
-        <q-card flat style="height: 100%" square class="col-2">
-          <q-card-section class=" q-pa-none q-py-sm row">
-            <h6 class="q-px-none q-pl-md q-my-sm">Категории:</h6>
-            <q-space/>
-            <q-btn v-if="isCanCreate" flat size="md" icon="add" @click="addNewCategoryDialog = true"></q-btn>
-          </q-card-section>
-          <q-card-section class="q-pa-none">
-            <q-list class="text-primary q-pa-none">
-              <q-separator/>
-              <q-item clickable v-ripple
-                      :active="(selectedCategories && categories && selectedCategories.length === categories.length)"
-                      @click="selectAllCategories" class="q-py-sm categories-list-inactive"
-                      active-class="categories-list-active">
-                <q-item-section>Все</q-item-section>
-                <q-space/>
-                <q-item-section avatar>
-                  <span class="category-count-icon">{{ numberOfExpenses }}</span>
-                </q-item-section>
-              </q-item>
-              <q-separator/>
-              <template v-for="category of categories" :key="category">
-                <q-item clickable :active="isCategorySelected(category.categoryId)"
-                        @click="addSelectedCategory(category)" class="categories-list-inactive"
-                        active-class="categories-list-active" @mouseenter="focusedCategory = category" @mouseleave="focusedCategory = null">
-                  <q-item-section>{{ category.name === 'EMPTY' ? 'Без категории' : category.name}}</q-item-section>
-                  <q-space/>
-                  <transition name="category-edit" v-if="category.name !== 'EMPTY'">
-                    <q-item-section  v-if="focusedCategory === category" avatar >
-                      <q-btn  class="category-edit-button" flat icon="edit" @click="openCategoryEditDialog(category); addSelectedCategory(category)"></q-btn>
-                    </q-item-section>
-                  </transition>
-                  <q-item-section avatar>
-                    <span class="category-count-icon">{{ category.expenses.length }}</span>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-list>
-          </q-card-section>
-        </q-card>
-      </q-drawer>
       <q-card flat square class="q-pa-md" style="height: 100%">
         <q-card-section class="row q-pa-none q-ma-none"
                         style="display: table-cell;vertical-align: middle;text-align: center;">
@@ -65,60 +20,6 @@
         </q-card-section>
       </q-card>
     </q-card>
-
-    <q-dialog v-model="addNewCategoryDialog" class="q-pa-none" position="standard">
-      <q-card id="dialog-add-info-schedule" class="q-pa-sm" style="width: 410px">
-        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
-          <h6 class="q-pa-none q-my-sm">Добавление категории:</h6>
-        </q-card-section>
-        <q-card-section class="q-mx-sm q-py-none">
-          <q-input v-model="categoryName" label="Название (15 символов)"/>
-        </q-card-section>
-        <q-card-actions class="justify-center q-mt-md">
-          <q-btn size="md" :disable="categoryName < 2 || categoryName.length > 15 || categoryName === 'EMPTY'" style="width: 110px" no-caps
-                 color="primary" label="Добавить" @click="createNewCategory(categoryName)" v-close-popup/>
-          <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <q-dialog v-model="editCategoryDialog" class="q-pa-none" position="standard">
-      <q-card id="dialog-add-info-schedule" class="q-pa-sm" style="width: 410px">
-        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
-          <h6 class="q-pa-none q-my-sm">Изменение категории:</h6>
-        </q-card-section>
-        <q-card-section class="q-mx-sm q-py-none">
-          <q-input v-model="categoryEditName" label="Название (15 символов)"/>
-        </q-card-section>
-        <q-card-actions class="justify-center q-mt-md">
-          <q-btn size="md" :disable="categoryEditName < 2 || categoryEditName.length > 15" style="width: 110px" no-caps
-                 color="primary" label="Изменить" @click="editCategory(categoryEditName)" v-close-popup/>
-          <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
-        </q-card-actions>
-        <q-card-section class="justify-center q-pa-none q-ma-none " style="text-align: center">
-          <q-btn style="width: 110px" color="red-5" @click="deleteCategoryDialog = true" no-caps label="Удалить"></q-btn>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
-    <q-dialog v-model="deleteCategoryDialog" class="q-pa-none" position="standard">
-      <q-card id="dialog-add-info-schedule" class="q-pa-sm" style="width: 410px; height: 238px">
-        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
-          <span class="q-pa-none q-my-sm" style="font-size: 16px">Что сделать с расходами данной категории:</span>
-        </q-card-section>
-        <q-card-section class="q-mx-sm q-py-none q-pt-md">
-          <q-radio v-model="categoryDeleteMode" val="save" label="Сохранить"/>
-<!--          <q-card-section class="row justify-between">
-          </q-card-section>-->
-        </q-card-section>
-        <q-card-section class="q-mx-sm q-py-none">
-          <q-radio v-model="categoryDeleteMode" val="delete" label="Удалить"/>
-        </q-card-section>
-        <q-card-actions class="justify-center q-mt-sm q-mx-sm q-px-md">
-          <q-btn size="md" style="width: 110px" no-caps
-                 color="primary" label="Подтвердить" @click="deleteCategory(categoryDeleteMode)" v-close-popup/>
-          <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
 
     <q-dialog v-model="createNewExpenseDialog" class="q-pa-none" position="standard">
       <q-card id="dialog-add-info-schedule" class="q-pa-sm" style="width: 410px">
@@ -172,6 +73,7 @@ import {useStore} from "vuex"
 import { connect, isConnected} from "src/services/other/websocket";
 import CategoryService from "src/services/expenses/CategoryService";
 import ExpensesService from "src/services/expenses/expenseService";
+import CategoriesDrawer from "components/CategoriesDrawer";
 
 const priorityOptions = [
   {
@@ -198,6 +100,9 @@ const priorityOptions = [
 
 export default defineComponent({
   name: 'PageIndex',
+  components : {
+    CategoriesDrawer,
+  },
   setup() {
     const router = useRouter();
     const store = useStore();
@@ -207,88 +112,10 @@ export default defineComponent({
     const isCanDeleting = computed(()=> store.getters['teams/getDeletingPermission']);
     const isCanModerating = computed(()=> store.getters['teams/getModeratingPermission']);
 
-    const currentTeam = ref({});
-    const addNewCategoryDialog = ref(false);
-    const editCategoryDialog = ref(false);
-    const deleteCategoryDialog = ref(false);
     const categoryDrawer = ref(true);
-    const categoryName = ref('');
-    const categories = ref([]);
-    const selectedCategories = ref([]);
-    const focusedCategory = ref({});
-    const categoryEditId = ref(0);
-    const categoryEditName = ref('');
-    const categoryDeleteMode = ref('save')
-
-    const isCategorySelected = (id) => {
-      if (categories.value && selectedCategories.value) {
-        if (categories.value.length === selectedCategories.value.length) {
-          return false;
-        }
-        for (let category of selectedCategories.value) {
-          if (category.categoryId === id) {
-            return true;
-          }
-        }
-        return false;
-      } else {
-        return false;
-      }
-    };
-
-    const addSelectedCategory = (category) => {
-      if (selectedCategories.value.includes(category)) {
-        const index = selectedCategories.value.indexOf(category);
-        if (index > -1) {
-          selectedCategories.value.splice(index, 1);
-        }
-      } else {
-        if (selectedCategories.value.length === categories.value.length) {
-          selectAllCategories();
-        } else {
-          selectedCategories.value.push(category);
-        }
-      }
-    }
-
-    const selectAllCategories = () => {
-      if (selectedCategories.value.length === categories.value.length) {
-        selectedCategories.value.splice(0, selectedCategories.value.length);
-      } else {
-        selectedCategories.value.splice(0, selectedCategories.value.length);
-        selectedCategories.value.push.apply(selectedCategories.value, categories.value);
-      }
-    }
-
-    const numberOfExpenses = computed(() => {
-      if (categories.value) {
-        let counter = 0;
-        for (let category of categories.value) {
-          counter += category.expenses.length;
-        }
-        return counter;
-      } else {
-        return 0;
-      }
-    })
-
-    const openCategoryEditDialog = (category) => {
-      categoryEditName.value = category.name;
-      categoryEditId.value = category.categoryId;
-      editCategoryDialog.value = true;
-    }
-
-    const createNewCategory = (name) => {
-      CategoryService.createNewCategory(name, currentTeam.value.teamId);
-    }
-
-    const editCategory = (newName) => {
-      CategoryService.editCategory({id : categoryEditId.value, newName});
-    }
-
-    const deleteCategory = (mode) => {
-      CategoryService.deleteCategory({id: categoryEditId.value, deleteExpenses: mode === 'delete'})
-    }
+    const currentTeam = computed(()=> store.getters['teams/getCurrentTeam']);
+    const categories = computed(() => store.getters['teams/getTeamCategories']);
+    const selectedCategories = computed(()=> store.getters['teams/getSelectedTeamCategories']);
 
     const createNewExpenseDialog = ref(false);
     const expenseName = ref('');
@@ -344,9 +171,6 @@ export default defineComponent({
       const teams = currentUser?.teams;
       if (teams && teams.length !== 0) {
         store.commit('teams/setCurrentTeam', teams[0]); // TODO: add team selecting
-        currentTeam.value = store.getters['teams/getCurrentTeam'];
-        categories.value = store.getters['teams/getTeamCategories'];
-        selectedCategories.value.push.apply(selectedCategories.value, categories.value);
         await store.dispatch('teams/getUserPermissionInTeam', {userId : currentUser.id, teamId : currentTeam.value.teamId})
       } else {
         await router.push("/team/create");
@@ -354,17 +178,9 @@ export default defineComponent({
     })
 
     return {
-      addNewCategoryDialog,
-      editCategoryDialog,
-      deleteCategoryDialog,
-      categoryEditName,
-      categoryDeleteMode,
       currentTeam,
-      categoryName,
       categories,
-      focusedCategory,
       selectedCategories,
-      numberOfExpenses,
       categoryDrawer,
       createNewExpenseDialog,
       expenseName,
@@ -382,13 +198,6 @@ export default defineComponent({
       isCanUpdate,
       isCanDeleting,
       isCanModerating,
-      isCategorySelected,
-      addSelectedCategory,
-      createNewCategory,
-      selectAllCategories,
-      openCategoryEditDialog,
-      editCategory,
-      deleteCategory,
       createNewExpense
     }
   }

@@ -24,8 +24,6 @@ export default boot(async ({store}) => {
     name: '/user/queue/expensesUpdating', callback: (category) => {
       const value = JSON.parse(category.body);
       store.commit('teams/updateExpenses', value);
-      //store.commit('teams/deleteCategory', value.deletedCategory)
-      //store.commit('teams/updateCategories', value.emptyCategory)
     }
   });
 

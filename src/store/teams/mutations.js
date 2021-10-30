@@ -1,6 +1,9 @@
+import {getCategoryIndex} from "src/services/expenses/categoryService";
+
 export function setCurrentTeam(state, team) {
   state.currentTeam = team;
   state.categories = team.categories;
+  state.selectedCategories = state.categories;
 }
 
 export function updateCategories(state, newCategory) {
@@ -17,6 +20,26 @@ export function updateCategories(state, newCategory) {
 export function deleteCategory(state, deletedCategory) {
   const index = getCategoryIndex(state.categories, deletedCategory.categoryId);
   state.categories.splice(index, 1);
+}
+
+export function selectAllCategories(state) {
+  if (state.selectedCategories.length === state.categories.length) {
+    state.selectedCategories.splice(0, state.selectedCategories.length);
+  } else {
+    state.selectedCategories.splice(0, state.selectedCategories.length);
+    state.selectedCategories.push.apply(state.selectedCategories, state.categories);
+  }
+}
+
+export function removeSelectedCategory(state, category) {
+  const index = getCategoryIndex(state.selectedCategories, category.categoryId);
+  state.selectedCategories.splice(index, 1);
+}
+
+export function addCategoryToSelected(state, category) {
+  if (category) {
+    state.selectedCategories.push(category);
+  }
 }
 
 export function updateExpenses(state, expense) {
@@ -37,11 +60,3 @@ export function setPermissions(state, permissions) {
   }
 }
 
-function getCategoryIndex(list, id) {
-  for (let i = 0; i < list.length; i++) {
-    if (list[i].categoryId === id) {
-      return i;
-    }
-  }
-  return -1;
-}

@@ -1,35 +1,12 @@
 import TeamService from "src/services/team/teamService";
-import CategoryService from "src/services/expenses/CategoryService";
-import ExpenseService from "src/services/expenses/expenseService";
 import PermissionService from "src/services/team/permissionService"
-
-export async function getTeamById ( {commit}, {teamId} ) {
-  try {
-    const data = await TeamService.getTeamById(teamId)
-    commit('setCurrentTeam', data)
-    return data;
-  } catch (e) {
-    throw e;
-  }
-}
+import {getCategoryIndex} from "src/services/expenses/categoryService";
 
 export async function createNewTeam ( {commit}, {name, userId}) {
   try {
     const data = await TeamService.createNewTeam(name, userId);
     if (data) {
       commit('setCurrentTeam', data)
-      return data;
-    }
-  } catch (e) {
-    console.log(e)
-    throw e;
-  }
-}
-
-export async function createNewExpense ({commit}, expense) {
-  try {
-    const data = await ExpenseService.createNewExpense(expense);
-    if (data) {
       return data;
     }
   } catch (e) {
@@ -49,5 +26,17 @@ export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
   } catch (e) {
     console.log(e)
     throw e;
+  }
+}
+
+export function addSelectedCategoryAction({commit, state}, category) {
+  if (state.selectedCategories.includes(category)) {
+    commit('removeSelectedCategory', category);
+  } else {
+    if (state.selectedCategories.length === state.categories.length) {
+      commit('selectAllCategories');
+    } else {
+      commit('addCategoryToSelected', category)
+    }
   }
 }

@@ -6,6 +6,10 @@ export function getTeamCategories(state) {
   return state.categories;
 }
 
+export function getSelectedTeamCategories(state) {
+  return state.selectedCategories;
+}
+
 export function getCreatePermission(state) {
   if (state.permissions) {
     return state.permissions.adding;

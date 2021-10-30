@@ -3,6 +3,7 @@ export default function () {
     currentTeam : {},
     permissions : {},
     categories : [],
+    selectedCategories : [],
     teamLimit : 0,
   }
 }
