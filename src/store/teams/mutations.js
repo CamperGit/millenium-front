@@ -51,13 +51,35 @@ export function addCategoryToSelected(state, category) {
   }
 }
 
-export function updateExpenses(state, expense) {
-  if (expense) {
-    for (let category of state.categories) {
-      if (category.categoryId === expense.category.categoryId) {
-        category.expenses.push(expense);
-        break;
+export function updateExpenses(state, newExpense) {
+  if (newExpense) {
+    let found = false;
+    let categories = state.categories;
+    let categoryIndex = getCategoryIndex(categories, newExpense.category.categoryId);
+    for (let category of categories) {
+      let expenses = category.expenses;
+      for (let i = 0; i < expenses.length; i++) {
+        let expense = expenses[i];
+        if (expense.expenseId === newExpense.expenseId) {
+          found = true;
+          expense.name = newExpense.name;
+          expense.date = newExpense.date;
+          expense.priority = newExpense.priority;
+          expense.description = newExpense.description;
+          expense.fixedPrice = newExpense.fixedPrice;
+          expense.minPrice = newExpense.minPrice;
+          expense.maxPrice = newExpense.maxPrice;
+          if (category.categoryId !== newExpense.category.categoryId) {
+            expenses.splice(i, 1);
+            categories[categoryIndex].expenses.push(expense);
+          }
+          break;
+        }
       }
+    }
+    if (!found && categoryIndex !== -1) {
+      let category = categories[categoryIndex];
+      category.expenses.push(newExpense);
     }
   }
 }
@@ -69,12 +91,9 @@ export function deleteExpense(state, expense) {
       let category = state.categories[categoryIndex];
       const expenseIndex = getExpenseIndex(category.expenses, expense.expenseId);
       if (expenseIndex !== -1) {
-        console.log(category.expenses);
         category.expenses.splice(expenseIndex, 1);
-        console.log(category.expenses)
       }
     }
-    console.log(expense)
     /*const categoryIndex = getCategoryIndex(state.categories, expense.categoryId);
     if (index !== -1) {
       state.categories.splice(index, 1);

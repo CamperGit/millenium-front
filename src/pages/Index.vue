@@ -9,7 +9,7 @@
           <span>{{ currentTeam.name }}</span>
         </q-card-section>
         <q-card-section class="q-pa-none q-ma-none">
-          <q-btn v-if="isCanCreate" label="Добавить" @click="createNewExpenseDialog = true"></q-btn>
+          <q-btn v-if="isCanCreate" label="Добавить" @click="expenseDialog = true"></q-btn>
         </q-card-section>
         <q-card-section class="col-12">
           <q-table
@@ -20,15 +20,17 @@
           >
             <template v-slot:body-cell-delete="props">
               <q-td :props="props" class="q-pa-none q-ma-none">
-                <div  class="q-pa-none q-ma-none">
-                  <q-btn flat color="red-5" icon="delete" class="expense-table-buttons q-pa-none q-ma-none" @click="deleteExpense(props.row)"></q-btn>
+                <div class="q-pa-none q-ma-none">
+                  <q-btn flat color="red-5" icon="delete" class="expense-table-buttons q-pa-none q-ma-none"
+                         @click="deleteExpense(props.row)"></q-btn>
                 </div>
               </q-td>
             </template>
-            <template  v-slot:body-cell-edit="props">
+            <template v-slot:body-cell-edit="props">
               <q-td :props="props" class="q-pa-none q-ma-none">
-                <div  class="q-pa-none q-ma-none">
-                  <q-btn flat color="grey" icon="edit" class="expense-table-buttons q-pa-none q-ma-none" @click="editExpense(props.row)"></q-btn>
+                <div class="q-pa-none q-ma-none">
+                  <q-btn flat color="grey" icon="edit" class="expense-table-buttons q-pa-none q-ma-none"
+                         @click="openEditDialog(props.row)"></q-btn>
                 </div>
               </q-td>
             </template>
@@ -37,9 +39,12 @@
       </q-card>
     </q-card>
 
-    <q-dialog v-model="createNewExpenseDialog" class="q-pa-none" position="standard">
+    <q-dialog v-model="expenseDialog" class="q-pa-none" position="standard">
       <q-card id="dialog-add-info-schedule" class="q-pa-sm" style="width: 410px">
-        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
+        <q-card-section v-if="expenseEditMode" class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
+          <h6 class="q-pa-none q-my-sm">Изменить статью расхода:</h6>
+        </q-card-section>
+        <q-card-section v-else class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
           <h6 class="q-pa-none q-my-sm">Добавление нового расхода:</h6>
         </q-card-section>
         <q-card-section class="q-mx-sm q-py-none">
@@ -69,10 +74,15 @@
           <q-input v-model="expenseMaxPrice" type="number" label="До"></q-input>
         </q-card-section>
         <q-card-actions class="justify-center q-mt-md">
-          <q-btn size="md" :disable="!isExpenseValid" style="width: 110px" no-caps
+          <q-btn v-if="expenseEditMode" size="md" :disable="!isExpenseValid" style="width: 110px" no-caps
+                 color="primary" label="Изменить"
+                 @click="editExpense({expenseName, expenseDescription, expensePriority, expenseCategory, expenseFixedPrice,
+                  expenseMinPrice, expenseMaxPrice, expensePriceType, editedExpenseId})" v-close-popup/>
+          <q-btn v-else size="md" :disable="!isExpenseValid" style="width: 110px" no-caps
                  color="primary" label="Добавить"
-                 @click="createNewExpense({expenseName, expenseDescription, expensePriority, expenseCategory, expenseFixedPrice,
-                  expenseMinPrice, expenseMaxPrice, expensePriceType})" v-close-popup/>
+                 @click="createNewExpense({expenseName, expenseDescription, expensePriority, expenseCategory,
+            expenseFixedPrice,
+            expenseMinPrice, expenseMaxPrice, expensePriceType})" v-close-popup/>
           <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
         </q-card-actions>
       </q-card>
@@ -132,9 +142,9 @@ const expensesTableColumns = [
   {
     name: 'date',
     label: 'Дата создания',
-    field: (row)=> {
+    field: (row) => {
       const date = new Date(row.date);
-      return date.getDate()  + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " +
+      return date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " +
         date.getHours() + ":" + date.getMinutes();
     },
     align: 'center',
@@ -142,7 +152,7 @@ const expensesTableColumns = [
   {
     name: 'price',
     label: 'Цена',
-    field: (row)=>{
+    field: (row) => {
       if (row.fixedPrice !== null) {
         return row.fixedPrice;
       } else {
@@ -155,7 +165,7 @@ const expensesTableColumns = [
   {
     name: 'priority',
     label: 'Приоритет',
-    field: (row)=> {
+    field: (row) => {
       return getPriorityLabelByValue(row.priority);
     },
     align: 'center',
@@ -164,7 +174,7 @@ const expensesTableColumns = [
   {
     name: 'category',
     label: 'Категория',
-    field: (row)=> {
+    field: (row) => {
       if (row.categoryName === 'EMPTY') {
         return 'Без категории'
       } else {
@@ -188,24 +198,26 @@ const expensesTableColumns = [
 
 export default defineComponent({
   name: 'PageIndex',
-  components : {
+  components: {
     CategoriesDrawer,
   },
   setup() {
     const router = useRouter();
     const store = useStore();
 
-    const isCanCreate = computed(()=> store.getters['teams/getCreatePermission']);
-    const isCanUpdate = computed(()=> store.getters['teams/getChangingPermission']);
-    const isCanDeleting = computed(()=> store.getters['teams/getDeletingPermission']);
-    const isCanModerating = computed(()=> store.getters['teams/getModeratingPermission']);
+    const isCanCreate = computed(() => store.getters['teams/getCreatePermission']);
+    const isCanUpdate = computed(() => store.getters['teams/getChangingPermission']);
+    const isCanDeleting = computed(() => store.getters['teams/getDeletingPermission']);
+    const isCanModerating = computed(() => store.getters['teams/getModeratingPermission']);
 
     const categoryDrawer = ref(true);
-    const currentTeam = computed(()=> store.getters['teams/getCurrentTeam']);
+    const currentTeam = computed(() => store.getters['teams/getCurrentTeam']);
     const categories = computed(() => store.getters['teams/getTeamCategories']);
-    const selectedCategories = computed(()=> store.getters['teams/getSelectedTeamCategories']);
+    const selectedCategories = computed(() => store.getters['teams/getSelectedTeamCategories']);
 
-    const createNewExpenseDialog = ref(false);
+    const expenseEditMode = ref(false);
+    const editedExpenseId = ref(0);
+    const expenseDialog = ref(false);
     const expenseName = ref('');
     const expenseDescription = ref('');
     const expensePriority = ref('MEDIUM');
@@ -225,12 +237,12 @@ export default defineComponent({
       return valid;
     });
 
-    const selectedExpenses = computed(()=> {
+    const selectedExpenses = computed(() => {
       if (selectedCategories.value && selectedCategories.value.length !== 0) {
         let resultArray = [];
         for (let category of selectedCategories.value) {
-          for (let expense of category.expenses ) {
-            let expenseObject = {...expense, categoryName : category.name}
+          for (let expense of category.expenses) {
+            let expenseObject = {...expense, categoryName: category.name}
             resultArray.push(expenseObject)
           }
         }
@@ -245,7 +257,8 @@ export default defineComponent({
     }
 
     const editExpense = (expense) => {
-      console.log(expense)
+      ExpensesService.editExpense(expense);
+      //expenseDialog.value = false;
     }
 
     const deleteExpense = (expense) => {
@@ -254,7 +267,54 @@ export default defineComponent({
       }
     }
 
+    const getCategoryByName = (name) => {
+      for (let category of categories.value) {
+        if (category.name === name) {
+          return category;
+        }
+      }
+    }
+
+    const clearExpenseDialogFields = () => {
+      editedExpenseId.value = 0;
+      expenseName.value = '';
+      expenseDescription.value = '';
+      expenseFixedPrice.value = 0.0;
+      expenseMinPrice.value = 0.0;
+      expenseMaxPrice.value = 0.0;
+      expenseCategory.value = null;
+      expensePriceType.value = 'fixed';
+      expenseEditMode.value = false;
+    }
+
+    const openEditDialog = (expense) => {
+      editedExpenseId.value = expense.expenseId;
+      expenseName.value = expense.name;
+      expenseDescription.value = expense.description !== null ? expense.description : '';
+      expensePriority.value = expense.priority;
+      expenseCategory.value = getCategoryByName(expense.categoryName).categoryId;
+      if (expense.fixedPrice !== null) {
+        expensePriceType.value = 'fixed';
+        expenseFixedPrice.value = expense.fixedPrice;
+      } else {
+        expensePriceType.value = 'range';
+        expenseMinPrice.value = expense.minPrice;
+        expenseMaxPrice.value = expense.maxPrice;
+      }
+      expenseEditMode.value = true;
+      expenseDialog.value = true;
+    }
+
+    watch(expenseDialog, (val) => {
+      if (!val && expenseEditMode.value) {
+        clearExpenseDialogFields();
+      }
+    })
+
     watch(selectedExpenses, (val) => {
+      console.log(val)
+    })
+    watch(expenseCategory, (val) => {
       console.log(val)
     })
 
@@ -271,7 +331,10 @@ export default defineComponent({
       const teams = currentUser?.teams;
       if (teams && teams.length !== 0) {
         store.commit('teams/setCurrentTeam', teams[0]); // TODO: add team selecting
-        await store.dispatch('teams/getUserPermissionInTeam', {userId : currentUser.id, teamId : currentTeam.value.teamId})
+        await store.dispatch('teams/getUserPermissionInTeam', {
+          userId: currentUser.id,
+          teamId: currentTeam.value.teamId
+        })
       } else {
         await router.push("/team/create");
       }
@@ -282,7 +345,7 @@ export default defineComponent({
       categories,
       selectedCategories,
       categoryDrawer,
-      createNewExpenseDialog,
+      expenseDialog,
       expenseName,
       expenseDescription,
       expensePriority,
@@ -298,10 +361,14 @@ export default defineComponent({
       isCanUpdate,
       isCanDeleting,
       isCanModerating,
+      expenseEditMode,
+      editedExpenseId,
       expensesTableColumns,
       editExpense,
       deleteExpense,
-      createNewExpense
+      openEditDialog,
+      createNewExpense,
+      clearExpenseDialogFields
     }
   }
 })
