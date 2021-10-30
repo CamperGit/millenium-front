@@ -1,17 +1,29 @@
-import { boot } from 'quasar/wrappers'
+import {boot} from 'quasar/wrappers'
 import SockJS from 'sockjs-client'
 import {Stomp} from '@stomp/stompjs'
 import {addSubscription, connect, stompClient} from "src/services/other/websocket";
 import EventBus from "src/common/eventBus";
 
 
-
-export default boot(async ( {store} ) => {
-  addSubscription({ name : '/users/queue/categories', callback : (category) => {
+export default boot(async ({store}) => {
+  addSubscription({
+    name: '/user/queue/categoriesUpdating', callback: (category) => {
       const value = JSON.parse(category.body);
-      store.commit('teams/addCategory', value)
-    }});
-  console.log('add subscriptions')
+      console.log(value)
+      console.log('changedAlLOOOOOOOOO')
+      store.commit('teams/updateCategories', value)
+    }
+  });
+  addSubscription({
+    name: '/user/queue/deletedCategories', callback: (category) => {
+      //console.log(category);
+      const value = JSON.parse(category.body);
+      console.log(value)
+      console.log("DELETED ALLLLLLLLLLLLOOO")
+      store.commit('teams/deleteCategory', value.deletedCategory)
+      store.commit('teams/updateCategories', value.emptyCategory)
+    }
+  });
 
   try {
     const accessToken = store.getters['auth/getAccessToken'];

@@ -3,41 +3,16 @@ import {stompClient} from "src/services/other/websocket";
 import {StompHeaders} from "@stomp/stompjs";
 
 class CategoryService {
-  async createNewCategory(name, teamId) {
+  createNewCategory(name, teamId) {
     stompClient.send("/millenium/createCategory",{} , JSON.stringify({name, teamId}));
   }
 
-  async getCategoryById(id) {
-    const config = {
-      params: {
-        categoryId : id,
-      },
-    }
-    try {
-      return await api.get("/categories", config)
-    } catch (e) {
-      throw e
-    }
+  editCategory(category) {
+    stompClient.send("/millenium/editCategory",{} , JSON.stringify(category));
   }
 
-
-  /*async changeLessonsByNewValues(lessonsToChange, newValuesObj) {
-    try {
-      const {data} = await api.put("/categories",{
-        lessonsToChange,
-      });
-      return data;
-    } catch (e) {
-      throw e;
-    }
-  }*/
-
-  async deleteCategoryById(categoryId) {
-    try {
-      await api.delete("/categories/" + categoryId);
-    } catch (e) {
-      throw e;
-    }
+  deleteCategory(deleteRequest) {
+    stompClient.send("/millenium/deleteCategory", {}, JSON.stringify(deleteRequest))
   }
 }
 
