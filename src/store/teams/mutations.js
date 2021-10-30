@@ -19,7 +19,9 @@ export function updateCategories(state, newCategory) {
 
 export function deleteCategory(state, deletedCategory) {
   const index = getCategoryIndex(state.categories, deletedCategory.categoryId);
-  state.categories.splice(index, 1);
+  if (index !== -1) {
+    state.categories.splice(index, 1);
+  }
 }
 
 export function selectAllCategories(state) {
@@ -33,7 +35,9 @@ export function selectAllCategories(state) {
 
 export function removeSelectedCategory(state, category) {
   const index = getCategoryIndex(state.selectedCategories, category.categoryId);
-  state.selectedCategories.splice(index, 1);
+  if (index !== -1) {
+    state.selectedCategories.splice(index, 1);
+  }
 }
 
 export function addCategoryToSelected(state, category) {

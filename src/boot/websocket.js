@@ -15,8 +15,7 @@ export default boot(async ({store}) => {
   addSubscription({
     name: '/user/queue/deletedCategories', callback: (category) => {
       const value = JSON.parse(category.body);
-      store.commit('teams/deleteCategory', value.deletedCategory)
-      store.commit('teams/updateCategories', value.emptyCategory)
+      store.dispatch('teams/handleDeletedCategoryResponse', value);
     }
   });
 

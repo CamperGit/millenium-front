@@ -40,3 +40,9 @@ export function addSelectedCategoryAction({commit, state}, category) {
     }
   }
 }
+
+export function handleDeletedCategoryResponse({commit}, response) {
+  commit('deleteCategory', response.deletedCategory)
+  commit('removeSelectedCategory', response.deletedCategory)
+  commit('updateCategories', response.emptyCategory)
+}
