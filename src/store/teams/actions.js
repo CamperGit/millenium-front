@@ -42,6 +42,7 @@ export async function createNewExpense ({commit}, expense) {
 export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
   try {
     const data = await PermissionService.getUserPermissionInTeam(userId, teamId);
+    console.log(data)
     if (data) {
       commit('setPermissions', data)
       return data;

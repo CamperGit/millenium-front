@@ -77,13 +77,13 @@ export default {
     const handleLogin = async (user) => {
       try {
         const isLoginSuccess = await store.dispatch("auth/loginAction", user);
-        $q.notify({
-          color: "green-4",
-          textColor: "white",
-          icon: "cloud_done",
-          message: "Успешная авторизация",
-        });
         if (isLoginSuccess) {
+          $q.notify({
+            color: "green-4",
+            textColor: "white",
+            icon: "cloud_done",
+            message: "Успешная авторизация",
+          });
           const currentUser = store.getters['auth/getCurrentUser'];
           const teams = currentUser.teams;
           if (!teams || teams.length === 0) {

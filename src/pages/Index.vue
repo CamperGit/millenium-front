@@ -11,7 +11,7 @@
           <q-card-section class=" q-pa-none q-py-sm row">
             <h6 class="q-px-none q-pl-md q-my-sm">Категории:</h6>
             <q-space/>
-            <q-btn flat size="md" icon="add" @click="addNewCategoryDialog = true"></q-btn>
+            <q-btn v-if="isCanCreate" flat size="md" icon="add" @click="addNewCategoryDialog = true"></q-btn>
           </q-card-section>
           <!--          <q-separator/>
               <q-card-section >
@@ -53,7 +53,7 @@
           <span>{{ currentTeam.name }}</span>
         </q-card-section>
         <q-card-section class="q-pa-none q-ma-none">
-          <q-btn label="Добавить" @click="createNewExpenseDialog = true"></q-btn>
+          <q-btn v-if="isCanCreate" label="Добавить" @click="createNewExpenseDialog = true"></q-btn>
         </q-card-section>
         <q-card-section>
           <q-table
@@ -162,6 +162,12 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const store = useStore();
+
+    const isCanCreate = computed(()=> store.getters['teams/getCreatePermission']);
+    const isCanUpdate = computed(()=> store.getters['teams/getChangingPermission']);
+    const isCanDeleting = computed(()=> store.getters['teams/getDeletingPermission']);
+    const isCanModerating = computed(()=> store.getters['teams/getModeratingPermission']);
+
     const currentTeam = ref({});
     const addNewCategoryDialog = ref(false);
     const categoryDrawer = ref(true);
@@ -308,6 +314,10 @@ export default defineComponent({
       isExpenseValid,
       expensePriceType,
       selectedExpenses,
+      isCanCreate,
+      isCanUpdate,
+      isCanDeleting,
+      isCanModerating,
       isCategorySelected,
       addSelectedCategory,
       createNewCategory,
