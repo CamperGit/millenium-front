@@ -4,7 +4,6 @@ import TokenService from '../../services/auth/tokenService'
 export async function loginAction({ commit }, user) {
   try {
     const data = await AuthService.login(user);
-    console.log(data)
     if (data) {
       const user = {username : data.username, email : data.email, id : data.id, roles : data.roles, teams : data.teams};
       const accessToken = {expirationTime : data.accessTokenExpiryAt, token : data.accessToken, type : data.tokenType};

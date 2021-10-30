@@ -18,7 +18,6 @@ export async function createNewTeam ( {commit}, {name, userId}) {
 export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
   try {
     const data = await PermissionService.getUserPermissionInTeam(userId, teamId);
-    console.log(data)
     if (data) {
       commit('setPermissions', data)
       return data;

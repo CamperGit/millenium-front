@@ -1,8 +1,10 @@
 import {getCategoryIndex} from "src/services/expenses/categoryService";
+import {getExpenseIndex} from "src/services/expenses/expenseService";
 
 export function setCurrentTeam(state, team) {
   state.currentTeam = team;
   state.categories = team.categories;
+  state.selectedCategories.splice(0, state.selectedCategories.length);
   state.selectedCategories.push.apply(state.selectedCategories, state.categories);
 }
 
@@ -10,7 +12,10 @@ export function updateCategories(state, newCategory) {
   if (newCategory) {
     const index = getCategoryIndex(state.categories, newCategory.categoryId);
     if (index !== -1) {
-      state.categories.splice(index, 1, newCategory);
+      let category = state.categories[index];
+      category.name = newCategory.name;
+      category.expenses = newCategory.expenses;
+      //state.categories.splice(index, 1, newCategory);
     } else {
       state.categories.push(newCategory);
     }
@@ -47,7 +52,6 @@ export function addCategoryToSelected(state, category) {
 }
 
 export function updateExpenses(state, expense) {
-  console.log(expense)
   if (expense) {
     for (let category of state.categories) {
       if (category.categoryId === expense.category.categoryId) {
@@ -55,6 +59,26 @@ export function updateExpenses(state, expense) {
         break;
       }
     }
+  }
+}
+
+export function deleteExpense(state, expense) {
+  if (expense) {
+    const categoryIndex = getCategoryIndex(state.categories, expense.category.categoryId);
+    if (categoryIndex !== -1) {
+      let category = state.categories[categoryIndex];
+      const expenseIndex = getExpenseIndex(category.expenses, expense.expenseId);
+      if (expenseIndex !== -1) {
+        console.log(category.expenses);
+        category.expenses.splice(expenseIndex, 1);
+        console.log(category.expenses)
+      }
+    }
+    console.log(expense)
+    /*const categoryIndex = getCategoryIndex(state.categories, expense.categoryId);
+    if (index !== -1) {
+      state.categories.splice(index, 1);
+    }*/
   }
 }
 

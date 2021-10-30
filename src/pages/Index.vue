@@ -2,7 +2,7 @@
   <q-page>
     <categories-drawer :is-showed="categoryDrawer"/>
     <q-card flat square class="row" style="height: 100%">
-      <q-card flat square class="q-pa-md" style="height: 100%">
+      <q-card flat square class="q-pa-md col-12" style="height: 100%">
         <q-card-section class="row q-pa-none q-ma-none"
                         style="display: table-cell;vertical-align: middle;text-align: center;">
           <q-btn style="width: 36px; height: 36px" @click="categoryDrawer = !categoryDrawer" flat icon="menu"></q-btn>
@@ -11,12 +11,28 @@
         <q-card-section class="q-pa-none q-ma-none">
           <q-btn v-if="isCanCreate" label="Добавить" @click="createNewExpenseDialog = true"></q-btn>
         </q-card-section>
-        <q-card-section>
+        <q-card-section class="col-12">
           <q-table
             title="Treats"
             :rows="selectedExpenses"
+            :columns="expensesTableColumns"
             row-key="name"
-          />
+          >
+            <template v-slot:body-cell-delete="props">
+              <q-td :props="props" class="q-pa-none q-ma-none">
+                <div  class="q-pa-none q-ma-none">
+                  <q-btn flat color="red-5" icon="delete" class="expense-table-buttons q-pa-none q-ma-none" @click="deleteExpense(props.row)"></q-btn>
+                </div>
+              </q-td>
+            </template>
+            <template  v-slot:body-cell-edit="props">
+              <q-td :props="props" class="q-pa-none q-ma-none">
+                <div  class="q-pa-none q-ma-none">
+                  <q-btn flat color="grey" icon="edit" class="expense-table-buttons q-pa-none q-ma-none" @click="editExpense(props.row)"></q-btn>
+                </div>
+              </q-td>
+            </template>
+          </q-table>
         </q-card-section>
       </q-card>
     </q-card>
@@ -66,12 +82,10 @@
 </template>
 
 <script>
-import {defineComponent, ref, computed, onMounted, watch} from 'vue';
-import TeamService from "src/services/team/teamService";
+import {computed, defineComponent, onMounted, ref, watch} from 'vue';
 import {useRouter} from "vue-router";
 import {useStore} from "vuex"
-import { connect, isConnected} from "src/services/other/websocket";
-import CategoryService from "src/services/expenses/CategoryService";
+import {connect, isConnected} from "src/services/other/websocket";
 import ExpensesService from "src/services/expenses/expenseService";
 import CategoriesDrawer from "components/CategoriesDrawer";
 
@@ -95,6 +109,80 @@ const priorityOptions = [
   {
     label: 'Очень высокий',
     value: 'PRIMARY'
+  },
+]
+
+function getPriorityLabelByValue(value) {
+  for (let priority of priorityOptions) {
+    if (priority.value === value) {
+      return priority.label;
+    }
+  }
+  return '';
+}
+
+const expensesTableColumns = [
+  {
+    name: 'name',
+    label: 'Название',
+    field: 'name',
+    align: 'center',
+    style: 'max-width: 250px'
+  },
+  {
+    name: 'date',
+    label: 'Дата создания',
+    field: (row)=> {
+      const date = new Date(row.date);
+      return date.getDate()  + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " +
+        date.getHours() + ":" + date.getMinutes();
+    },
+    align: 'center',
+  },
+  {
+    name: 'price',
+    label: 'Цена',
+    field: (row)=>{
+      if (row.fixedPrice !== null) {
+        return row.fixedPrice;
+      } else {
+        return 'От ' + row.minPrice + ' до' + row.maxPrice;
+      }
+    },
+    align: 'center',
+    //style: 'max-width: 100px'
+  },
+  {
+    name: 'priority',
+    label: 'Приоритет',
+    field: (row)=> {
+      return getPriorityLabelByValue(row.priority);
+    },
+    align: 'center',
+    //style: 'max-width: 100px'
+  },
+  {
+    name: 'category',
+    label: 'Категория',
+    field: (row)=> {
+      if (row.categoryName === 'EMPTY') {
+        return 'Без категории'
+      } else {
+        return row.categoryName;
+      }
+    },
+    align: 'center',
+    //style: 'max-width: 100px'
+  },
+  {
+    name: 'delete',
+    align: 'center',
+    style: 'max-width: 32px'
+  },
+  {
+    name: 'edit',
+    align: 'center',
+    style: 'max-width: 32px'
   },
 ]
 
@@ -141,7 +229,10 @@ export default defineComponent({
       if (selectedCategories.value && selectedCategories.value.length !== 0) {
         let resultArray = [];
         for (let category of selectedCategories.value) {
-          resultArray.push.apply(resultArray, category.expenses);
+          for (let expense of category.expenses ) {
+            let expenseObject = {...expense, categoryName : category.name}
+            resultArray.push(expenseObject)
+          }
         }
         return resultArray;
       } else {
@@ -149,8 +240,18 @@ export default defineComponent({
       }
     })
 
-    const createNewExpense = async (expense) => {
+    const createNewExpense = (expense) => {
       ExpensesService.createNewExpense(expense);
+    }
+
+    const editExpense = (expense) => {
+      console.log(expense)
+    }
+
+    const deleteExpense = (expense) => {
+      if (expense) {
+        ExpensesService.deleteExpense(expense.expenseId);
+      }
     }
 
     watch(selectedExpenses, (val) => {
@@ -162,7 +263,6 @@ export default defineComponent({
       const accessToken = store.getters['auth/getAccessToken'];
       if (currentUser && accessToken) {
         if (!isConnected()) {
-          console.log('connect')
           connect(accessToken);
         }
       } else {
@@ -198,52 +298,17 @@ export default defineComponent({
       isCanUpdate,
       isCanDeleting,
       isCanModerating,
+      expensesTableColumns,
+      editExpense,
+      deleteExpense,
       createNewExpense
     }
   }
 })
 </script>
 <style scoped>
-#category-drawer {
-  background-color: #F0F2F4;
-  box-shadow: rgba(0, 0, 0, 0.15) 2.4px 0 3.2px;
-  min-width: 182px
-}
-
-.category-count-icon {
+.expense-table-buttons {
   height: 32px;
   width: 32px;
-  text-align: center;
-  padding-top: 5px;
-  color: black;
-  background-color: rgb(229 229 229);
-  border-radius: 3px
-}
-
-.categories-list-inactive {
-  color: black;
-}
-
-.categories-list-active {
-  color: white;
-  background: rgba(25, 118, 210, 0.8);
-}
-
-.category-edit-enter-active,
-.category-edit-leave-active {
-  transition: opacity .5s
-}
-
-.category-edit-enter,
-.category-edit-leave-to {
-  opacity: 0
-}
-
-.category-edit-button {
-  height: 32px;
-  width: 32px;
-  margin-right: -15px;
-  transition-duration: 20s;
-  transition: opacity .5s
 }
 </style>

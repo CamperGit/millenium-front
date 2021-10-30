@@ -20,9 +20,15 @@ export default boot(async ({store}) => {
   });
 
   addSubscription({
-    name: '/user/queue/expensesUpdating', callback: (category) => {
-      const value = JSON.parse(category.body);
+    name: '/user/queue/expensesUpdating', callback: (expense) => {
+      const value = JSON.parse(expense.body);
       store.commit('teams/updateExpenses', value);
+    }
+  });
+  addSubscription({
+    name: '/user/queue/deletedExpenses', callback: (expense) => {
+      const value = JSON.parse(expense.body);
+      store.commit('teams/deleteExpense', value);
     }
   });
 

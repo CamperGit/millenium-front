@@ -29,9 +29,18 @@ class ExpenseService {
     stompClient.send("/millenium/editExpense",{} , JSON.stringify(expense));
   }
 
-  deleteExpense(deleteRequest) {
-    stompClient.send("/millenium/deleteExpense", {}, JSON.stringify(deleteRequest))
+  deleteExpense(expenseId) {
+    stompClient.send("/millenium/deleteExpense", {}, expenseId)
   }
+}
+
+export function getExpenseIndex(list, id) {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].expenseId === id) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 export default new ExpenseService();
