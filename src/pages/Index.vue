@@ -18,7 +18,7 @@
         </q-card-section>
         <q-slide-transition :duration="800">
           <div v-show="showStatistic">
-            <q-card-section  class="row q-pt-md q-col-gutter-x-xl q-col-gutter-y-xl">
+            <q-card-section class="row q-pt-md q-col-gutter-x-xl q-col-gutter-y-lg">
               <div class="col-6 col-md-3">
                 <q-card bordered class="stats-card shadow-1">
                   <q-card-section class="q-ma-md q-pa-none row no-wrap">
@@ -26,7 +26,7 @@
                       <q-icon size="md" name="insert_chart_outlined" color="white"/>
                     </div>
                     <q-space/>
-                    <span class="q-ma-none" style="font-weight: bold; font-size: 32px; margin-top: -10px">400</span>
+                    <span class="q-ma-none stats-value-span">{{ averageExpenseCost }}</span>
                   </q-card-section>
                   <q-separator class="q-mx-md q-mt-lg"></q-separator>
                   <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
@@ -41,7 +41,7 @@
                       <q-icon size="md" name="query_stats" color="white"/>
                     </div>
                     <q-space/>
-                    <span class="q-ma-none" style="font-weight: bold; font-size: 32px; margin-top: -10px">400</span>
+                    <span class="q-ma-none stats-value-span">{{ pronounceOnThisMonth }}</span>
                   </q-card-section>
                   <q-separator class="q-mx-md q-mt-lg"></q-separator>
                   <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
@@ -49,14 +49,14 @@
                   </q-card-section>
                 </q-card>
               </div>
-              <div class="col-6 col-md-3" >
+              <div class="col-6 col-md-3">
                 <q-card bordered class="stats-card shadow-1">
                   <q-card-section class="q-ma-md q-pa-none row no-wrap">
                     <div class="stats-icon-div row justify-center items-center shadow-8">
                       <q-icon size="md" name="attach_money" color="white"/>
                     </div>
                     <q-space/>
-                    <span class="q-ma-none" style="font-weight: bold; font-size: 32px; margin-top: -10px">400</span>
+                    <span class="q-ma-none stats-value-span">{{ spendOnThisMonth }}</span>
                   </q-card-section>
                   <q-separator class="q-mx-md q-mt-lg"></q-separator>
                   <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
@@ -64,14 +64,14 @@
                   </q-card-section>
                 </q-card>
               </div>
-              <div class="col-6 col-md-3" >
+              <div class="col-6 col-md-3">
                 <q-card bordered class="stats-card shadow-1">
                   <q-card-section class="q-ma-md q-pa-none row no-wrap">
                     <div class="stats-icon-div row justify-center items-center shadow-8">
                       <q-icon size="md" name="money_off" color="white"/>
                     </div>
                     <q-space/>
-                    <span class="q-ma-none" style="font-weight: bold; font-size: 32px; margin-top: -10px">400</span>
+                    <span class="q-ma-none stats-value-span">400</span>
                   </q-card-section>
                   <q-separator class="q-mx-md q-mt-lg"></q-separator>
                   <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
@@ -82,12 +82,14 @@
             </q-card-section>
           </div>
         </q-slide-transition>
-        <q-card-section  class="row q-pt-md q-col-gutter-x-xl q-col-gutter-y-md">
+        <q-card-section class="row q-pt-md q-col-gutter-x-xl q-col-gutter-y-md">
           <div class="col-6 col-md-3">
-            <q-select dense label="Фильтр по году"/>
+            <q-select v-model="yearFilterSelect" options-dense :options="yearSelectColumns" dense
+                      label="Фильтр по году"/>
           </div>
           <div class="col-6 col-md-3">
-            <q-select dense label="Фильтр по месяцу"/>
+            <q-select v-model="monthFilterSelect" options-dense :options="monthSelectOptions" map-options emit-value
+                      dense label="Фильтр по месяцу"/>
           </div>
           <div class="col-6 col-md-3 offset-6 offset-md-3 row">
             <q-space/>
@@ -104,6 +106,7 @@
             hide-pagination
             wrap-cells
             :visible-columns="visibleColumns"
+            no-data-label="Не удалось найти расходы с заданными фильтрами"
           >
             <template v-slot:body-cell-delete="props">
               <q-td :props="props" class="q-pa-none q-ma-none">
@@ -199,6 +202,7 @@ import {useStore} from "vuex"
 import {connect, isConnected} from "src/services/other/websocket";
 import ExpensesService from "src/services/expenses/expenseService";
 import CategoriesDrawer from "components/CategoriesDrawer";
+import {daysInMonth} from "src/services/other/tools";
 
 const priorityOptions = [
   {
@@ -220,6 +224,57 @@ const priorityOptions = [
   {
     label: 'Очень высокий',
     value: 'PRIMARY'
+  },
+]
+
+const monthSelectOptions = [
+  {
+    label: 'Январь',
+    value: 0
+  },
+  {
+    label: 'Февраль',
+    value: 1
+  },
+  {
+    label: 'Март',
+    value: 2
+  },
+  {
+    label: 'Апрель',
+    value: 3
+  },
+  {
+    label: 'Май',
+    value: 4
+  },
+  {
+    label: 'Июнь',
+    value: 5
+  },
+  {
+    label: 'Июль',
+    value: 6
+  },
+  {
+    label: 'Август',
+    value: 7
+  },
+  {
+    label: 'Сентябрь',
+    value: 8
+  },
+  {
+    label: 'Октябрь',
+    value: 9
+  },
+  {
+    label: 'Ноябрь',
+    value: 10
+  },
+  {
+    label: 'Декабрь',
+    value: 11
   },
 ]
 
@@ -326,21 +381,12 @@ export default defineComponent({
     const isCanModerating = computed(() => store.getters['teams/getModeratingPermission']);
 
     const categoryDrawer = ref(true);
+    const yearFilterSelect = ref(0);
+    const yearSelectColumns = ref([]);
+    const monthFilterSelect = ref(0);
     const currentTeam = computed(() => store.getters['teams/getCurrentTeam']);
     const categories = computed(() => store.getters['teams/getTeamCategories']);
     const selectedCategories = computed(() => store.getters['teams/getSelectedTeamCategories']);
-
-    const averageExpenseCost = computed(()=> {
-      return 0;
-    })
-
-    const spendOnThisMonth = computed(()=> {
-      return 0;
-    })
-
-    const pronounceOnThisMonth = computed(()=> {
-      return 0;
-    })
 
     const toggleCategoryDrawer = () => {
       store.commit('teams/toggleCategoryDrawer');
@@ -373,13 +419,64 @@ export default defineComponent({
         let resultArray = [];
         for (let category of selectedCategories.value) {
           for (let expense of category.expenses) {
-            let expenseObject = {...expense, categoryName: category.name}
-            resultArray.push(expenseObject)
+            const date = new Date(expense.date);
+            if (date.getFullYear() === yearFilterSelect.value && date.getMonth() === monthFilterSelect.value) {
+              let expenseObject = {...expense, categoryName: category.name}
+              resultArray.push(expenseObject)
+            }
           }
         }
         return resultArray;
       } else {
         return [];
+      }
+    })
+
+    const getExpensePrice = (expense) => {
+      if (expense.fixedPrice !== null) {
+        return expense.fixedPrice;
+      } else {
+        return ((expense.minPrice + expense.maxPrice) / 2)
+      }
+    }
+
+    const averageExpenseCost = computed(() => {
+      let fullSum = 0.0;
+      let result = 0.0;
+      const expenses = selectedExpenses.value;
+      if (expenses.length !== 0) {
+        for (let expense of expenses) {
+          fullSum += getExpensePrice(expense);
+        }
+        result = fullSum / expenses.length;
+      }
+      return result.toFixed(2);
+    })
+
+    const spendOnThisMonth = computed(() => {
+      let fullSum = 0.0;
+      const expenses = selectedExpenses.value;
+      if (expenses.length !== 0) {
+        for (let expense of expenses) {
+          fullSum += getExpensePrice(expense);
+        }
+      }
+      return fullSum.toFixed(2);
+    })
+
+    const pronounceOnThisMonth = computed(() => {
+      const currentDate = new Date();
+      if (currentDate.getFullYear() === yearFilterSelect.value && currentDate.getMonth() === monthFilterSelect.value) {
+        let result = 0.0;
+        const daysGone = currentDate.getDate();
+        const avgOnDay = spendOnThisMonth.value / daysGone;
+        const daysLeft = 32 - daysGone;
+        const pronounce = Number(avgOnDay * daysLeft);
+        const alreadySpend = Number(spendOnThisMonth.value);
+        result = pronounce + alreadySpend;
+        return result.toFixed(2);
+      } else {
+        return spendOnThisMonth.value;
       }
     })
 
@@ -446,12 +543,10 @@ export default defineComponent({
       }
     }
 
-    const visibleColumns = computed(()=> {
-      console.log('compute columns')
-      let resultColumns = ['name', 'description', 'date', 'price','priority', 'category'];
+    const visibleColumns = computed(() => {
+      let resultColumns = ['name', 'description', 'date', 'price', 'priority', 'category'];
       changeColumnsByPermissions(resultColumns, 'edit', isCanUpdate.value);
       changeColumnsByPermissions(resultColumns, 'delete', isCanDeleting.value);
-      console.log(resultColumns)
       return resultColumns;
     })
 
@@ -482,6 +577,16 @@ export default defineComponent({
           userId: currentUser.id,
           teamId: currentTeam.value.teamId
         })
+        const dateOfCreateApp = new Date(2021, 9, 31);
+        const currentDate = new Date();
+        let yearsArray = [];
+        while (dateOfCreateApp <= currentDate) {
+          yearsArray.push(dateOfCreateApp.getFullYear());
+          dateOfCreateApp.setFullYear(dateOfCreateApp.getFullYear() + 1);
+        }
+        yearSelectColumns.value = yearsArray;
+        yearFilterSelect.value = currentDate.getFullYear();
+        monthFilterSelect.value = currentDate.getMonth();
       } else {
         await router.push("/team/create");
       }
@@ -513,6 +618,13 @@ export default defineComponent({
       expensesTableColumns,
       visibleColumns,
       showStatistic,
+      yearFilterSelect,
+      monthFilterSelect,
+      yearSelectColumns,
+      monthSelectOptions,
+      averageExpenseCost,
+      spendOnThisMonth,
+      pronounceOnThisMonth,
       toggleCategoryDrawer,
       editExpense,
       deleteExpense,
@@ -542,6 +654,12 @@ export default defineComponent({
   height: 72px;
   width: 72px;
   margin-top: -36px;
-  background-color: rgb(255,164,22);
+  background-color: rgb(255, 164, 22);
+}
+
+.stats-value-span {
+  font-weight: bold;
+  font-size: 32px;
+  margin-top: -10px
 }
 </style>
