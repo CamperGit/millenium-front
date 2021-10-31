@@ -10,9 +10,12 @@
             <span v-else><u>Показать статистику</u></span>
           </q-btn>
           <q-space/>
-          <span style="margin-right: 10px">
-            {{ currentTeam.name }}
-          </span>
+          <q-btn no-caps flat @click="teamSelectDialog = true">
+            <u>Сменить рабочее пространство</u>
+          </q-btn>
+          <!--          <span style="margin-right: 10px">
+                      {{ currentTeam.name }}
+                    </span>-->
           <q-btn icon="notifications" flat class="team-header-buttons"/>
           <q-btn v-if="isCanModerating" icon="settings" flat class="team-header-buttons"/>
         </q-card-section>
@@ -71,13 +74,16 @@
                       <q-icon size="md" name="money_off" color="white"/>
                     </div>
                     <q-space/>
-                    <span class="q-ma-none stats-value-span">{{ teamLimit !== null ? teamLimit.limit : 'Не задано' }}</span>
+                    <span class="q-ma-none stats-value-span">{{
+                        teamLimit !== null ? teamLimit.limit : 'Не задано'
+                      }}</span>
                   </q-card-section>
                   <q-separator class="q-mx-md q-mt-lg"></q-separator>
                   <q-card-section class="row q-mt-sm q-mx-md  q-pa-none">
                     <span style="color: gray">Лимит расходов в этом месяце</span>
                     <q-space/>
-                    <q-btn v-if="isCanUpdate" color="grey" class="team-header-buttons" style="margin-top: -7px" icon="edit" flat @click="openTeamLimitDialog"></q-btn>
+                    <q-btn v-if="isCanUpdate" color="grey" class="team-header-buttons" style="margin-top: -7px"
+                           icon="edit" flat @click="openTeamLimitDialog"></q-btn>
                   </q-card-section>
                 </q-card>
               </div>
@@ -194,7 +200,7 @@
       </q-card>
     </q-dialog>
     <q-dialog v-model="teamLimitDialog">
-      <q-card  class="q-pa-sm" style="width: 410px">
+      <q-card class="q-pa-sm" style="width: 410px">
         <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
           <h6 class="q-pa-none q-my-sm">Изменение лимита расходов:</h6>
         </q-card-section>
@@ -207,6 +213,50 @@
                  color="primary" label="Изменить" @click="editTeamLimit(teamLimitInput)" v-close-popup/>
           <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
         </q-card-actions>
+      </q-card>
+    </q-dialog>
+<!--    <q-dialog v-model="teamSelectDialog" persistent>
+      <q-card class="q-pa-sm" style="width: 410px">
+        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
+          <h6 class="q-pa-none q-my-sm">Выберите организацию:</h6>
+        </q-card-section>
+        <q-card-section class="q-mx-sm q-py-none">
+          <q-list>
+            <template v-for="team of currentUser.teams" :key="team">
+              <q-item clickable >
+                <q-item-section>
+                  <q-item-label>
+                    {{team.name}}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-list>
+        </q-card-section>
+      </q-card>
+    </q-dialog>-->
+    <q-dialog v-model="teamSelectDialog">
+      <q-card flat class="q-pa-none" style="max-width: 350px; width: 350px">
+        <q-toolbar class="bg-primary text-white shadow-2">
+          <q-toolbar-title>Выберите организацию</q-toolbar-title>
+        </q-toolbar>
+
+        <q-list bordered >
+          <template v-for="team of currentUser.teams" :key="team.teamId" >
+            <q-item class="q-ma-none" clickable @click="selectCurrentTeam(team)" v-close-popup v-ripple>
+              <q-item-section avatar>
+                <q-avatar color="primary" text-color="white">
+                  {{ team.name.substr(0,1) }}
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>{{team.name}}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-separator/>
+          </template>
+        </q-list>
       </q-card>
     </q-dialog>
 
@@ -394,17 +444,19 @@ export default defineComponent({
     const store = useStore();
 
     const showStatistic = ref(true);
+    const currentUser = computed(() => store.getters['auth/getCurrentUser']);
     const isCanCreate = computed(() => store.getters['teams/getCreatePermission']);
     const isCanUpdate = computed(() => store.getters['teams/getChangingPermission']);
     const isCanDeleting = computed(() => store.getters['teams/getDeletingPermission']);
     const isCanModerating = computed(() => store.getters['teams/getModeratingPermission']);
 
     const categoryDrawer = ref(true);
+    const teamSelectDialog = ref(false);
     const yearFilterSelect = ref(0);
     const yearSelectColumns = ref([]);
     const monthFilterSelect = ref(0);
     const currentTeam = computed(() => store.getters['teams/getCurrentTeam']);
-    const teamLimit = computed(()=> store.getters['teams/getTeamLimit']);
+    const teamLimit = computed(() => store.getters['teams/getTeamLimit']);
     const categories = computed(() => store.getters['teams/getTeamCategories']);
     const selectedCategories = computed(() => store.getters['teams/getSelectedTeamCategories']);
 
@@ -553,7 +605,7 @@ export default defineComponent({
     const teamLimitDialog = ref(false);
     const teamLimitInput = ref(0.0);
 
-    const openTeamLimitDialog = ()=> {
+    const openTeamLimitDialog = () => {
       teamLimitDialog.value = true;
       if (teamLimit.value) {
         teamLimitInput.value = teamLimit.value.limit;
@@ -561,7 +613,12 @@ export default defineComponent({
     }
 
     const editTeamLimit = (limit) => {
-      TeamService.editTeamLimit({limit, month : monthFilterSelect.value, year : yearFilterSelect.value, teamId : currentTeam.value.teamId})
+      TeamService.editTeamLimit({
+        limit,
+        month: monthFilterSelect.value,
+        year: yearFilterSelect.value,
+        teamId: currentTeam.value.teamId
+      })
     }
 
     const changeColumnsByPermissions = (columns, permission, state) => {
@@ -584,17 +641,40 @@ export default defineComponent({
       return resultColumns;
     })
 
+    const loadPageInfo = async (user, team) => {
+      await store.dispatch('teams/setCurrentTeamAction', team);
+      await store.dispatch('teams/getUserPermissionInTeam', {
+        userId: user.id,
+        teamId: team.teamId
+      })
+      const dateOfCreateApp = new Date(2021, 9, 31);
+
+      const currentDate = new Date();
+      let yearsArray = [];
+      while (dateOfCreateApp <= currentDate) {
+        yearsArray.push(dateOfCreateApp.getFullYear());
+        dateOfCreateApp.setFullYear(dateOfCreateApp.getFullYear() + 1);
+      }
+      yearSelectColumns.value = yearsArray;
+      yearFilterSelect.value = currentDate.getFullYear();
+      monthFilterSelect.value = currentDate.getMonth();
+    }
+
+    const selectCurrentTeam = async (team) => {
+      await loadPageInfo(currentUser.value, team)
+    }
+
     watch(expenseDialog, (val) => {
       if (!val && expenseEditMode.value) {
         clearExpenseDialogFields();
       }
     })
 
-    watch(yearFilterSelect, (val)=> {
-      store.commit('teams/setTeamLimitByYearAndMonth', {year : val, month : monthFilterSelect.value})
+    watch(yearFilterSelect, (val) => {
+      store.commit('teams/setTeamLimitByYearAndMonth', {year: val, month: monthFilterSelect.value})
     })
-    watch(monthFilterSelect, (val)=> {
-      store.commit('teams/setTeamLimitByYearAndMonth', {year : yearFilterSelect.value, month : val})
+    watch(monthFilterSelect, (val) => {
+      store.commit('teams/setTeamLimitByYearAndMonth', {year: yearFilterSelect.value, month: val})
     })
 
     watch(selectedExpenses, (val) => {
@@ -602,33 +682,21 @@ export default defineComponent({
     })
 
     onMounted(async () => {
-      const currentUser = store.getters['auth/getCurrentUser'];
       const accessToken = store.getters['auth/getAccessToken'];
-      if (currentUser && accessToken) {
+      if (currentUser.value && accessToken) {
         if (!isConnected()) {
           connect(accessToken);
         }
       } else {
         await router.push("/auth/login");
       }
-      const teams = currentUser?.teams;
+      const teams = currentUser.value?.teams;
       if (teams && teams.length !== 0) {
-        await store.dispatch('teams/setCurrentTeamAction', teams[0]); // TODO: add team selecting
-        await store.dispatch('teams/getUserPermissionInTeam', {
-          userId: currentUser.id,
-          teamId: currentTeam.value.teamId
-        })
-        const dateOfCreateApp = new Date(2021, 9, 31);
-
-        const currentDate = new Date();
-        let yearsArray = [];
-        while (dateOfCreateApp <= currentDate) {
-          yearsArray.push(dateOfCreateApp.getFullYear());
-          dateOfCreateApp.setFullYear(dateOfCreateApp.getFullYear() + 1);
+        if (teams.length === 1) {
+          await loadPageInfo(currentUser.value, teams[0]);
+        } else {
+          teamSelectDialog.value = true;
         }
-        yearSelectColumns.value = yearsArray;
-        yearFilterSelect.value = currentDate.getFullYear();
-        monthFilterSelect.value = currentDate.getMonth();
       } else {
         await router.push("/team/create");
       }
@@ -670,6 +738,9 @@ export default defineComponent({
       teamLimit,
       teamLimitDialog,
       teamLimitInput,
+      teamSelectDialog,
+      currentUser,
+      selectCurrentTeam,
       editTeamLimit,
       openTeamLimitDialog,
       toggleCategoryDrawer,
