@@ -3,10 +3,20 @@
     <categories-drawer :is-showed="categoryDrawer"/>
     <q-card flat square class="row" style="height: 100%">
       <q-card flat square class="q-pa-md col-12" style="height: 100%">
-        <q-card-section class="row q-pa-none q-ma-none"
-                        style="display: table-cell;vertical-align: middle;text-align: center;">
-          <q-btn style="width: 36px; height: 36px" @click="categoryDrawer = !categoryDrawer" flat icon="menu"></q-btn>
-          <span>{{ currentTeam.name }}</span>
+<!--        style="display: table-cell;vertical-align: middle;text-align: center; width: 100%"-->
+        <q-card-section class="q-ma-none q-pt-none row no-wrap items-center">
+          <q-btn class="team-header-buttons" @click="categoryDrawer = !categoryDrawer" flat icon="menu"></q-btn>
+          <q-btn flat no-caps @click="showStatistic = !showStatistic">
+            <span v-if="showStatistic"><u>Скрыть статистику</u></span>
+            <span v-else><u>Показать статистику</u></span>
+          </q-btn>
+          <q-space/>
+          <span style="margin-right: 10px">
+            {{ currentTeam.name }}
+          </span>
+          <q-btn icon="notifications" flat class="team-header-buttons"/>
+          <q-btn icon="settings" flat class="team-header-buttons"/>
+
         </q-card-section>
         <q-card-section class="q-pa-none q-ma-none">
           <q-btn v-if="isCanCreate" label="Добавить" @click="expenseDialog = true"></q-btn>
@@ -236,6 +246,7 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
 
+    const showStatistic = ref(true);
     const isCanCreate = computed(() => store.getters['teams/getCreatePermission']);
     const isCanUpdate = computed(() => store.getters['teams/getChangingPermission']);
     const isCanDeleting = computed(() => store.getters['teams/getDeletingPermission']);
@@ -412,6 +423,7 @@ export default defineComponent({
       editedExpenseId,
       expensesTableColumns,
       visibleColumns,
+      showStatistic,
       editExpense,
       deleteExpense,
       openEditDialog,
@@ -425,5 +437,10 @@ export default defineComponent({
 .expense-table-buttons {
   height: 32px;
   width: 32px;
+}
+
+.team-header-buttons {
+  width: 36px;
+  height: 36px
 }
 </style>

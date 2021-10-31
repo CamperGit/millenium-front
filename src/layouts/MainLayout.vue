@@ -11,6 +11,7 @@
         <q-btn dense flat icon="crop_square" @click="toggleMaximize" />
         <q-btn dense flat icon="close" @click="closeApp" />
       </q-bar>
+      <Header/>
     </q-header>
     <q-page-container>
       <router-view />
@@ -21,11 +22,13 @@
 <script>
 
 import { defineComponent, ref } from 'vue'
+import Header from "components/Header";
 
 export default defineComponent({
   name: 'MainLayout',
 
   components: {
+    Header
   },
 
   setup () {
