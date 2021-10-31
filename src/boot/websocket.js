@@ -31,6 +31,12 @@ export default boot(async ({store}) => {
       store.commit('teams/deleteExpense', value);
     }
   });
+  addSubscription({
+    name: '/user/queue/updateTeamLimit', callback: (expense) => {
+      const value = JSON.parse(expense.body);
+      store.commit('teams/updateTeamLimit', value);
+    }
+  });
 
   try {
     const accessToken = store.getters['auth/getAccessToken'];

@@ -14,13 +14,4 @@ class CategoryService {
   }
 }
 
-export function getCategoryIndex(list, id) {
-  for (let i = 0; i < list.length; i++) {
-    if (list[i].categoryId === id) {
-      return i;
-    }
-  }
-  return -1;
-}
-
 export default new CategoryService();

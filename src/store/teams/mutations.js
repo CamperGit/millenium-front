@@ -1,20 +1,48 @@
-import {getCategoryIndex} from "src/services/expenses/categoryService";
-import {getExpenseIndex} from "src/services/expenses/expenseService";
+import {getIndexOfObject} from "src/services/other/tools";
 
 export function toggleCategoryDrawer(state) {
   state.categoryDrawer = !state.categoryDrawer;
 }
 
 export function setCurrentTeam(state, team) {
+  console.log(team)
   state.currentTeam = team;
-  state.categories = team.categories;
-  state.selectedCategories.splice(0, state.selectedCategories.length);
-  state.selectedCategories.push.apply(state.selectedCategories, state.categories);
+}
+
+export function setCategories(state, categories) {
+  state.categories = categories;
+}
+
+export function updateTeamLimit(state, updatedLimit) {
+  if (updatedLimit) {
+    let limits = state.currentTeam.limits;
+    const index = getIndexOfObject(limits,'limitId', updatedLimit.limitId);
+    if (index !== -1) {
+      let limit = limits[index];
+      limit.limit = updatedLimit.limit;
+    } else {
+      limits.push(updatedLimit);
+    }
+  }
+}
+
+export function setTeamLimitByYearAndMonth(state, {year, month}) {
+  let found = false;
+  const limits = state.currentTeam.limits;
+  for (let limit of limits) {
+    if (limit.year === year && limit.month === month) {
+      state.teamLimit = limit;
+      found = true;
+    }
+  }
+  if (!found) {
+    state.teamLimit = null;
+  }
 }
 
 export function updateCategories(state, newCategory) {
   if (newCategory) {
-    const index = getCategoryIndex(state.categories, newCategory.categoryId);
+    const index = getIndexOfObject(state.categories,'categoryId', newCategory.categoryId);
     if (index !== -1) {
       let category = state.categories[index];
       category.name = newCategory.name;
@@ -27,7 +55,7 @@ export function updateCategories(state, newCategory) {
 }
 
 export function deleteCategory(state, deletedCategory) {
-  const index = getCategoryIndex(state.categories, deletedCategory.categoryId);
+  const index = getIndexOfObject(state.categories,'categoryId', deletedCategory.categoryId);
   if (index !== -1) {
     state.categories.splice(index, 1);
   }
@@ -43,7 +71,7 @@ export function selectAllCategories(state) {
 }
 
 export function removeSelectedCategory(state, category) {
-  const index = getCategoryIndex(state.selectedCategories, category.categoryId);
+  const index = getIndexOfObject(state.selectedCategories,'categoryId', category.categoryId);
   if (index !== -1) {
     state.selectedCategories.splice(index, 1);
   }
@@ -59,7 +87,7 @@ export function updateExpenses(state, newExpense) {
   if (newExpense) {
     let found = false;
     let categories = state.categories;
-    let categoryIndex = getCategoryIndex(categories, newExpense.category.categoryId);
+    let categoryIndex = getIndexOfObject(categories,'categoryId', newExpense.category.categoryId);
     for (let category of categories) {
       let expenses = category.expenses;
       for (let i = 0; i < expenses.length; i++) {
@@ -90,18 +118,14 @@ export function updateExpenses(state, newExpense) {
 
 export function deleteExpense(state, expense) {
   if (expense) {
-    const categoryIndex = getCategoryIndex(state.categories, expense.category.categoryId);
+    const categoryIndex = getIndexOfObject(state.categories,'categoryId', expense.category.categoryId);
     if (categoryIndex !== -1) {
       let category = state.categories[categoryIndex];
-      const expenseIndex = getExpenseIndex(category.expenses, expense.expenseId);
+      const expenseIndex = getIndexOfObject(category.expenses,'expenseId', expense.expenseId);
       if (expenseIndex !== -1) {
         category.expenses.splice(expenseIndex, 1);
       }
     }
-    /*const categoryIndex = getCategoryIndex(state.categories, expense.categoryId);
-    if (index !== -1) {
-      state.categories.splice(index, 1);
-    }*/
   }
 }
 

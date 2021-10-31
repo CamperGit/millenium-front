@@ -14,12 +14,12 @@
             {{ currentTeam.name }}
           </span>
           <q-btn icon="notifications" flat class="team-header-buttons"/>
-          <q-btn icon="settings" flat class="team-header-buttons"/>
+          <q-btn v-if="isCanModerating" icon="settings" flat class="team-header-buttons"/>
         </q-card-section>
         <q-slide-transition :duration="800">
           <div v-show="showStatistic">
             <q-card-section class="row q-pt-md q-col-gutter-x-xl q-col-gutter-y-lg">
-              <div class="col-6 col-md-3">
+              <div class="col-md-6 col-lg-3">
                 <q-card bordered class="stats-card shadow-1">
                   <q-card-section class="q-ma-md q-pa-none row no-wrap">
                     <div class="stats-icon-div row justify-center items-center shadow-8">
@@ -34,7 +34,7 @@
                   </q-card-section>
                 </q-card>
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-md-6 col-lg-3">
                 <q-card bordered class="stats-card shadow-1">
                   <q-card-section class="q-ma-md q-pa-none row no-wrap">
                     <div class="stats-icon-div row justify-center items-center shadow-8">
@@ -49,7 +49,7 @@
                   </q-card-section>
                 </q-card>
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-md-6 col-lg-3">
                 <q-card bordered class="stats-card shadow-1">
                   <q-card-section class="q-ma-md q-pa-none row no-wrap">
                     <div class="stats-icon-div row justify-center items-center shadow-8">
@@ -64,18 +64,20 @@
                   </q-card-section>
                 </q-card>
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-md-6 col-lg-3">
                 <q-card bordered class="stats-card shadow-1">
                   <q-card-section class="q-ma-md q-pa-none row no-wrap">
                     <div class="stats-icon-div row justify-center items-center shadow-8">
                       <q-icon size="md" name="money_off" color="white"/>
                     </div>
                     <q-space/>
-                    <span class="q-ma-none stats-value-span">400</span>
+                    <span class="q-ma-none stats-value-span">{{ teamLimit !== null ? teamLimit.limit : 'Не задано' }}</span>
                   </q-card-section>
                   <q-separator class="q-mx-md q-mt-lg"></q-separator>
-                  <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
+                  <q-card-section class="row q-mt-sm q-mx-md  q-pa-none">
                     <span style="color: gray">Лимит расходов в этом месяце</span>
+                    <q-space/>
+                    <q-btn v-if="isCanUpdate" color="grey" class="team-header-buttons" style="margin-top: -7px" icon="edit" flat @click="openTeamLimitDialog"></q-btn>
                   </q-card-section>
                 </q-card>
               </div>
@@ -191,6 +193,22 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="teamLimitDialog">
+      <q-card  class="q-pa-sm" style="width: 410px">
+        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
+          <h6 class="q-pa-none q-my-sm">Изменение лимита расходов:</h6>
+        </q-card-section>
+        <q-card-section class="q-mx-sm q-py-none">
+          <q-input v-model="teamLimitInput" type="number" label="Значение"/>
+        </q-card-section>
+        <q-card-actions class="justify-center q-mt-md">
+          <q-btn size="md" :disable="teamLimitInput <= 0"
+                 style="width: 110px" no-caps
+                 color="primary" label="Изменить" @click="editTeamLimit(teamLimitInput)" v-close-popup/>
+          <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
   </q-page>
 </template>
@@ -201,6 +219,7 @@ import {useRouter} from "vue-router";
 import {useStore} from "vuex"
 import {connect, isConnected} from "src/services/other/websocket";
 import ExpensesService from "src/services/expenses/expenseService";
+import TeamService from "src/services/team/teamService";
 import CategoriesDrawer from "components/CategoriesDrawer";
 import {daysInMonth} from "src/services/other/tools";
 
@@ -385,6 +404,7 @@ export default defineComponent({
     const yearSelectColumns = ref([]);
     const monthFilterSelect = ref(0);
     const currentTeam = computed(() => store.getters['teams/getCurrentTeam']);
+    const teamLimit = computed(()=> store.getters['teams/getTeamLimit']);
     const categories = computed(() => store.getters['teams/getTeamCategories']);
     const selectedCategories = computed(() => store.getters['teams/getSelectedTeamCategories']);
 
@@ -470,7 +490,7 @@ export default defineComponent({
         let result = 0.0;
         const daysGone = currentDate.getDate();
         const avgOnDay = spendOnThisMonth.value / daysGone;
-        const daysLeft = 32 - daysGone;
+        const daysLeft = daysInMonth(yearFilterSelect.value, monthFilterSelect.value) - daysGone;
         const pronounce = Number(avgOnDay * daysLeft);
         const alreadySpend = Number(spendOnThisMonth.value);
         result = pronounce + alreadySpend;
@@ -530,6 +550,20 @@ export default defineComponent({
       expenseDialog.value = true;
     }
 
+    const teamLimitDialog = ref(false);
+    const teamLimitInput = ref(0.0);
+
+    const openTeamLimitDialog = ()=> {
+      teamLimitDialog.value = true;
+      if (teamLimit.value) {
+        teamLimitInput.value = teamLimit.value.limit;
+      }
+    }
+
+    const editTeamLimit = (limit) => {
+      TeamService.editTeamLimit({limit, month : monthFilterSelect.value, year : yearFilterSelect.value, teamId : currentTeam.value.teamId})
+    }
+
     const changeColumnsByPermissions = (columns, permission, state) => {
       for (let i = 0; i < columns.length; i++) {
         let column = columns[i];
@@ -556,6 +590,13 @@ export default defineComponent({
       }
     })
 
+    watch(yearFilterSelect, (val)=> {
+      store.commit('teams/setTeamLimitByYearAndMonth', {year : val, month : monthFilterSelect.value})
+    })
+    watch(monthFilterSelect, (val)=> {
+      store.commit('teams/setTeamLimitByYearAndMonth', {year : yearFilterSelect.value, month : val})
+    })
+
     watch(selectedExpenses, (val) => {
       console.log(val)
     })
@@ -572,12 +613,13 @@ export default defineComponent({
       }
       const teams = currentUser?.teams;
       if (teams && teams.length !== 0) {
-        store.commit('teams/setCurrentTeam', teams[0]); // TODO: add team selecting
+        await store.dispatch('teams/setCurrentTeamAction', teams[0]); // TODO: add team selecting
         await store.dispatch('teams/getUserPermissionInTeam', {
           userId: currentUser.id,
           teamId: currentTeam.value.teamId
         })
         const dateOfCreateApp = new Date(2021, 9, 31);
+
         const currentDate = new Date();
         let yearsArray = [];
         while (dateOfCreateApp <= currentDate) {
@@ -625,6 +667,11 @@ export default defineComponent({
       averageExpenseCost,
       spendOnThisMonth,
       pronounceOnThisMonth,
+      teamLimit,
+      teamLimitDialog,
+      teamLimitInput,
+      editTeamLimit,
+      openTeamLimitDialog,
       toggleCategoryDrawer,
       editExpense,
       deleteExpense,

@@ -2,6 +2,10 @@ export function getCategoryDrawerState(state) {
   return state.categoryDrawer;
 }
 
+export function getTeamLimit(state) {
+  return state.teamLimit;
+}
+
 export function getCurrentTeam(state) {
   return state.currentTeam;
 }

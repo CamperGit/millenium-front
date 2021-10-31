@@ -58,7 +58,7 @@
         <q-input v-model="categoryName" label="Название (15 символов)"/>
       </q-card-section>
       <q-card-actions class="justify-center q-mt-md">
-        <q-btn size="md" :disable="categoryName < 2 || categoryName.length > 15 || categoryName === 'EMPTY'"
+        <q-btn size="md" :disable="categoryName.length < 2 || categoryName.length > 15 || categoryName === 'EMPTY'"
                style="width: 110px" no-caps
                color="primary" label="Добавить" @click="createNewCategory(categoryName)" v-close-popup/>
         <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>

@@ -78,7 +78,7 @@ export default {
         const userId = currentUser.id;
         const data = await store.dispatch('teams/createNewTeam', {name, userId});
         if (data) {
-          console.log(data.teamId)
+          await store.dispatch('teams/setCurrentTeamAction', data);
           const teamsBefore = currentUser.teams.length;
           await store.dispatch('auth/addTeamAction', data)
           const teamsAfter = currentUser.teams.length;

@@ -1,4 +1,5 @@
 import {api} from "boot/axios"
+import {stompClient} from "src/services/other/websocket";
 
 class TeamService {
   async createNewTeam(name, userId) {
@@ -13,6 +14,10 @@ class TeamService {
     } catch (e) {
       throw e
     }
+  }
+
+  editTeamLimit(editRequest) {
+    stompClient.send("/millenium/updateTeamLimit",{} , JSON.stringify(editRequest));
   }
 
   async getTeamById(id) {

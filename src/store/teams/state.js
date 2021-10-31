@@ -4,7 +4,7 @@ export default function () {
     permissions : {},
     categories : [],
     selectedCategories : [],
-    teamLimit : 0,
+    teamLimit : null,
     categoryDrawer : true
   }
 }

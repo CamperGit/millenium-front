@@ -13,3 +13,12 @@ export function daysInMonth(year, month) {
   }
   return daysCounter;
 }
+
+export function getIndexOfObject(list, idName ,id) {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i][idName] === id) {
+      return i;
+    }
+  }
+  return -1;
+}

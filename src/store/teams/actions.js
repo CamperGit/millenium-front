@@ -1,14 +1,9 @@
 import TeamService from "src/services/team/teamService";
 import PermissionService from "src/services/team/permissionService"
-import {getCategoryIndex} from "src/services/expenses/categoryService";
 
 export async function createNewTeam ( {commit}, {name, userId}) {
   try {
-    const data = await TeamService.createNewTeam(name, userId);
-    if (data) {
-      commit('setCurrentTeam', data)
-      return data;
-    }
+    return await TeamService.createNewTeam(name, userId);
   } catch (e) {
     console.log(e)
     throw e;
@@ -26,6 +21,12 @@ export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
     console.log(e)
     throw e;
   }
+}
+
+export function setCurrentTeamAction({commit}, team) {
+  commit('setCurrentTeam', team)
+  commit('setCategories', team.categories)
+  commit('selectAllCategories');
 }
 
 export function addSelectedCategoryAction({commit, state}, category) {

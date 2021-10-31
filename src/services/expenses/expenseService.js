@@ -41,13 +41,4 @@ function createExpenseObject(expense) {
   };
 }
 
-export function getExpenseIndex(list, id) {
-  for (let i = 0; i < list.length; i++) {
-    if (list[i].expenseId === id) {
-      return i;
-    }
-  }
-  return -1;
-}
-
 export default new ExpenseService();
