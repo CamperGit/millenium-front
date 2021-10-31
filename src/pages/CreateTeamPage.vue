@@ -37,13 +37,13 @@
           <q-card style="width: 100%; background-color: white" flat class="q-pa-none q-ma-none">
             <q-card-section class="q-pt-md">
               <h6 class="q-pa-none q-ma-none">Введите ссылку приглашение, чтобы присоединиться к организации:</h6>
-              <q-input class="q-pt-sm" filled dense v-model="teamName" label="Пригласительная ссылка"/>
+              <q-input class="q-pt-sm" filled dense v-model="inviteLink" label="Пригласительная ссылка"/>
             </q-card-section>
             <q-card-section class="q-pt-none">
               <span>Вы будете добавлены в организацию только после просмотра и одобрения вашей заявки администратором</span>
             </q-card-section>
             <q-card-section style="padding-top: 40px">
-              <q-btn no-caps color="primary" style="width: 100%">Отправить заявку</q-btn>
+              <q-btn :disable="inviteLink.length < 32" no-caps color="primary" @click="sendJoinRequest(inviteLink)" style="width: 100%">Отправить заявку</q-btn>
             </q-card-section>
           </q-card>
         </q-tab-panel>
@@ -59,19 +59,22 @@ import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import {onMounted, ref, watch} from "vue";
 import TeamService from "src/services/team/teamService";
+import {useQuasar} from "quasar";
 
 export default {
   name: "CreateTeamPage",
   setup() {
     const router = useRouter();
     const store = useStore();
+    const $q = useQuasar();
+
     const isTeamNameEnabled = ref(false);
-    const inviteUrl = ref('');
     const teamName = ref('');
     const teamPageTabs = ref('create');
     const teamType = ref('team');
     const currentUser = store.getters["auth/getCurrentUser"];
     const errorMessage = ref(null);
+    const inviteLink = ref('');
 
     const createNewTeam = async (name) => {
       try {
@@ -97,9 +100,30 @@ export default {
 
     }
 
-    const getTeamById = async (teamName, customNumber) => {
-      const {data} = await TeamService.getTeamById(teamName, customNumber);
+    const sendJoinRequest = async (link) => {
+      const data = await TeamService.sendJoinRequest(link, currentUser.id)
+      if (data) {
+        $q.notify({
+          color: "green-4",
+          textColor: "white",
+          icon: "cloud_done",
+          message: "Заявка успешно отправлена",
+        });
+      } else {
+        $q.notify({
+          color: "red-5",
+          textColor: "white",
+          icon: "warning",
+          message: "Ошибка отправки заявки. Проверьте вашу пригласительную ссылку",
+        });
+      }
     }
+
+    watch(teamName, (val) => {
+      if (val === currentUser.username && teamType.value !== 'self') {
+        teamType.value = 'self';
+      }
+    })
 
     watch(teamPageTabs, (val) => {
       errorMessage.value = null;
@@ -127,9 +151,9 @@ export default {
       teamPageTabs,
       isTeamNameEnabled,
       errorMessage,
-      inviteUrl,
+      inviteLink,
       createNewTeam,
-      getTeamById,
+      sendJoinRequest,
     }
   }
 }

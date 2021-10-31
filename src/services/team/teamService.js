@@ -20,14 +20,15 @@ class TeamService {
     stompClient.send("/millenium/updateTeamLimit",{} , JSON.stringify(editRequest));
   }
 
-  async getTeamById(id) {
-    const config = {
-      params: {
-        teamId : id,
-      },
-    }
+  async sendJoinRequest(link, userId) {
     try {
-      return await api.get("/teams", config)
+      const {data} = await api.get("/teams/join", {
+        params: {
+          inviteLink : link,
+          userId
+        },
+      });
+      return data;
     } catch (e) {
       throw e
     }

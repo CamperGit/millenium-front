@@ -37,6 +37,12 @@ export default boot(async ({store}) => {
       store.commit('teams/updateTeamLimit', value);
     }
   });
+  addSubscription({
+    name: '/user/queue/joinRequestUpdate', callback: (expense) => {
+      const value = JSON.parse(expense.body);
+      console.log(value)
+    }
+  });
 
   try {
     const accessToken = store.getters['auth/getAccessToken'];
