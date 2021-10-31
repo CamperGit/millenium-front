@@ -22,6 +22,7 @@ export function updateTeamLimit(state, updatedLimit) {
       limit.limit = updatedLimit.limit;
     } else {
       limits.push(updatedLimit);
+      state.teamLimit = updatedLimit;
     }
   }
 }
