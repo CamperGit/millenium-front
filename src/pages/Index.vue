@@ -16,7 +16,11 @@
             title="Treats"
             :rows="selectedExpenses"
             :columns="expensesTableColumns"
-            row-key="name"
+            row-key="expenseId"
+            :rows-per-page-options="[0]"
+            hide-pagination
+            wrap-cells
+            :visible-columns="visibleColumns"
           >
             <template v-slot:body-cell-delete="props">
               <q-td :props="props" class="q-pa-none q-ma-none">
@@ -33,6 +37,20 @@
                          @click="openEditDialog(props.row)"></q-btn>
                 </div>
               </q-td>
+            </template>
+            <template v-slot:header="props">
+              <q-tr :props="props">
+                <q-th
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+                  style="color: rgba(25, 118, 210, 0.8); font-size: 15px; font-weight: 600"
+                >
+                  {{ col.label }}
+                </q-th>
+              </q-tr>
+            </template>
+            <template v-slot:top class="q-pa-none">
             </template>
           </q-table>
         </q-card-section>
@@ -83,7 +101,7 @@
                  @click="createNewExpense({expenseName, expenseDescription, expensePriority, expenseCategory,
             expenseFixedPrice,
             expenseMinPrice, expenseMaxPrice, expensePriceType})" v-close-popup/>
-          <q-btn size="md" style="width: 110px" no-caps label="Отмена" v-close-popup/>
+          <q-btn size="md" style="width: 110px;" no-caps label="Отмена" v-close-popup/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -137,7 +155,14 @@ const expensesTableColumns = [
     label: 'Название',
     field: 'name',
     align: 'center',
-    style: 'max-width: 250px'
+    style: 'max-width: 250px;'
+  },
+  {
+    name: 'description',
+    label: 'Описание',
+    field: 'description',
+    align: 'center',
+    style: 'max-width: 400px'
   },
   {
     name: 'date',
@@ -148,6 +173,8 @@ const expensesTableColumns = [
         date.getHours() + ":" + date.getMinutes();
     },
     align: 'center',
+    style: 'max-width: 180px;',
+    headerStyle: 'max-width: 180px;',
   },
   {
     name: 'price',
@@ -156,11 +183,11 @@ const expensesTableColumns = [
       if (row.fixedPrice !== null) {
         return row.fixedPrice;
       } else {
-        return 'От ' + row.minPrice + ' до' + row.maxPrice;
+        return 'От ' + row.minPrice + ' до ' + row.maxPrice;
       }
     },
     align: 'center',
-    //style: 'max-width: 100px'
+    style: 'max-width: 200px;'
   },
   {
     name: 'priority',
@@ -169,7 +196,7 @@ const expensesTableColumns = [
       return getPriorityLabelByValue(row.priority);
     },
     align: 'center',
-    //style: 'max-width: 100px'
+    style: 'max-width: 170px;'
   },
   {
     name: 'category',
@@ -182,17 +209,21 @@ const expensesTableColumns = [
       }
     },
     align: 'center',
-    //style: 'max-width: 100px'
+    style: 'max-width: 220px;'
   },
   {
     name: 'delete',
     align: 'center',
-    style: 'max-width: 32px'
+    style: 'width: 32px;max-width: 64px; padding: 7px 4px 7px 16px;',
+    headerStyle: 'width: 32px;width: 64px; padding: 7px 4px 7px 16px;',
+
   },
   {
     name: 'edit',
     align: 'center',
-    style: 'max-width: 32px'
+    style: 'width: 32px;max-width: 64px; padding: 7px 16px 7px 4px;',
+    headerStyle: 'width: 32px;max-width: 64px; padding: 7px 16px 7px 4px;',
+
   },
 ]
 
@@ -258,13 +289,10 @@ export default defineComponent({
 
     const editExpense = (expense) => {
       ExpensesService.editExpense(expense);
-      //expenseDialog.value = false;
     }
 
     const deleteExpense = (expense) => {
-      if (expense) {
-        ExpensesService.deleteExpense(expense.expenseId);
-      }
+      ExpensesService.deleteExpense(expense.expenseId);
     }
 
     const getCategoryByName = (name) => {
@@ -305,6 +333,28 @@ export default defineComponent({
       expenseDialog.value = true;
     }
 
+    const changeColumnsByPermissions = (columns, permission, state) => {
+      for (let i = 0; i < columns.length; i++) {
+        let column = columns[i];
+        if (column === permission && !state) {
+          columns.splice(i, 1);
+          return;
+        }
+      }
+      if (state) {
+        columns.push(permission);
+      }
+    }
+
+    const visibleColumns = computed(()=> {
+      console.log('compute columns')
+      let resultColumns = ['name', 'description', 'date', 'price','priority', 'category'];
+      changeColumnsByPermissions(resultColumns, 'edit', isCanUpdate.value);
+      changeColumnsByPermissions(resultColumns, 'delete', isCanDeleting.value);
+      console.log(resultColumns)
+      return resultColumns;
+    })
+
     watch(expenseDialog, (val) => {
       if (!val && expenseEditMode.value) {
         clearExpenseDialogFields();
@@ -312,9 +362,6 @@ export default defineComponent({
     })
 
     watch(selectedExpenses, (val) => {
-      console.log(val)
-    })
-    watch(expenseCategory, (val) => {
       console.log(val)
     })
 
@@ -364,6 +411,7 @@ export default defineComponent({
       expenseEditMode,
       editedExpenseId,
       expensesTableColumns,
+      visibleColumns,
       editExpense,
       deleteExpense,
       openEditDialog,
