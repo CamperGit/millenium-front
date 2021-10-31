@@ -7,10 +7,10 @@
     <q-space />
     <template v-if="isLogged">
       <q-btn no-caps flat :label="currentUser.username"/>
-      <q-btn no-caps flat label="Выйти" @click="logout" :to="'/auth/login'" class="q-mr-lg"/>
+      <q-btn no-caps flat label="Выйти" @click="logout" :to="'/auth/login'" class="q-mr-md"/>
     </template>
     <template v-else>
-      <q-btn no-caps flat label="Войти" :to="'/auth/login'" class="q-mr-lg"/>
+      <q-btn no-caps flat label="Войти" :to="'/auth/login'" class="q-mr-md"/>
     </template>
   </q-toolbar>
 <!--  <q-slide-transition :duration="400">

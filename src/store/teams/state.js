@@ -5,5 +5,6 @@ export default function () {
     categories : [],
     selectedCategories : [],
     teamLimit : 0,
+    categoryDrawer : true
   }
 }

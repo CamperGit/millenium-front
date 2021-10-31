@@ -1,11 +1,10 @@
 <template>
   <q-page>
-    <categories-drawer :is-showed="categoryDrawer"/>
-    <q-card flat square class="row" style="height: 100%">
-      <q-card flat square class="q-pa-md col-12" style="height: 100%">
-<!--        style="display: table-cell;vertical-align: middle;text-align: center; width: 100%"-->
+    <categories-drawer/>
+    <q-card flat square class="row q-pr-none" style="height: 100%">
+      <q-card flat square class="col-12 q-py-md q-pl-md q-pr-none" style="height: 100%">
         <q-card-section class="q-ma-none q-pt-none row no-wrap items-center">
-          <q-btn class="team-header-buttons" @click="categoryDrawer = !categoryDrawer" flat icon="menu"></q-btn>
+          <q-btn class="team-header-buttons" @click="toggleCategoryDrawer" flat icon="menu"></q-btn>
           <q-btn flat no-caps @click="showStatistic = !showStatistic">
             <span v-if="showStatistic"><u>Скрыть статистику</u></span>
             <span v-else><u>Показать статистику</u></span>
@@ -16,10 +15,84 @@
           </span>
           <q-btn icon="notifications" flat class="team-header-buttons"/>
           <q-btn icon="settings" flat class="team-header-buttons"/>
-
         </q-card-section>
-        <q-card-section class="q-pa-none q-ma-none">
-          <q-btn v-if="isCanCreate" label="Добавить" @click="expenseDialog = true"></q-btn>
+        <q-slide-transition :duration="800">
+          <div v-show="showStatistic">
+            <q-card-section  class="row q-pt-md q-col-gutter-x-xl q-col-gutter-y-xl">
+              <div class="col-6 col-md-3">
+                <q-card bordered class="stats-card shadow-1">
+                  <q-card-section class="q-ma-md q-pa-none row no-wrap">
+                    <div class="stats-icon-div row justify-center items-center shadow-8">
+                      <q-icon size="md" name="insert_chart_outlined" color="white"/>
+                    </div>
+                    <q-space/>
+                    <span class="q-ma-none" style="font-weight: bold; font-size: 32px; margin-top: -10px">400</span>
+                  </q-card-section>
+                  <q-separator class="q-mx-md q-mt-lg"></q-separator>
+                  <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
+                    <span style="color: gray">Средняя цена расхода</span>
+                  </q-card-section>
+                </q-card>
+              </div>
+              <div class="col-6 col-md-3">
+                <q-card bordered class="stats-card shadow-1">
+                  <q-card-section class="q-ma-md q-pa-none row no-wrap">
+                    <div class="stats-icon-div row justify-center items-center shadow-8">
+                      <q-icon size="md" name="query_stats" color="white"/>
+                    </div>
+                    <q-space/>
+                    <span class="q-ma-none" style="font-weight: bold; font-size: 32px; margin-top: -10px">400</span>
+                  </q-card-section>
+                  <q-separator class="q-mx-md q-mt-lg"></q-separator>
+                  <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
+                    <span style="color: gray">Прогноз расходов на месяц</span>
+                  </q-card-section>
+                </q-card>
+              </div>
+              <div class="col-6 col-md-3" >
+                <q-card bordered class="stats-card shadow-1">
+                  <q-card-section class="q-ma-md q-pa-none row no-wrap">
+                    <div class="stats-icon-div row justify-center items-center shadow-8">
+                      <q-icon size="md" name="attach_money" color="white"/>
+                    </div>
+                    <q-space/>
+                    <span class="q-ma-none" style="font-weight: bold; font-size: 32px; margin-top: -10px">400</span>
+                  </q-card-section>
+                  <q-separator class="q-mx-md q-mt-lg"></q-separator>
+                  <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
+                    <span style="color: gray">Расходов в этом месяце</span>
+                  </q-card-section>
+                </q-card>
+              </div>
+              <div class="col-6 col-md-3" >
+                <q-card bordered class="stats-card shadow-1">
+                  <q-card-section class="q-ma-md q-pa-none row no-wrap">
+                    <div class="stats-icon-div row justify-center items-center shadow-8">
+                      <q-icon size="md" name="money_off" color="white"/>
+                    </div>
+                    <q-space/>
+                    <span class="q-ma-none" style="font-weight: bold; font-size: 32px; margin-top: -10px">400</span>
+                  </q-card-section>
+                  <q-separator class="q-mx-md q-mt-lg"></q-separator>
+                  <q-card-section class="q-mt-sm q-mx-md  q-pa-none">
+                    <span style="color: gray">Лимит расходов в этом месяце</span>
+                  </q-card-section>
+                </q-card>
+              </div>
+            </q-card-section>
+          </div>
+        </q-slide-transition>
+        <q-card-section  class="row q-pt-md q-col-gutter-x-xl q-col-gutter-y-md">
+          <div class="col-6 col-md-3">
+            <q-select dense label="Фильтр по году"/>
+          </div>
+          <div class="col-6 col-md-3">
+            <q-select dense label="Фильтр по месяцу"/>
+          </div>
+          <div class="col-6 col-md-3 offset-6 offset-md-3 row">
+            <q-space/>
+            <q-btn no-caps color="primary" v-if="isCanCreate" label="Добавить" @click="expenseDialog = true"></q-btn>
+          </div>
         </q-card-section>
         <q-card-section class="col-12">
           <q-table
@@ -257,6 +330,22 @@ export default defineComponent({
     const categories = computed(() => store.getters['teams/getTeamCategories']);
     const selectedCategories = computed(() => store.getters['teams/getSelectedTeamCategories']);
 
+    const averageExpenseCost = computed(()=> {
+      return 0;
+    })
+
+    const spendOnThisMonth = computed(()=> {
+      return 0;
+    })
+
+    const pronounceOnThisMonth = computed(()=> {
+      return 0;
+    })
+
+    const toggleCategoryDrawer = () => {
+      store.commit('teams/toggleCategoryDrawer');
+    }
+
     const expenseEditMode = ref(false);
     const editedExpenseId = ref(0);
     const expenseDialog = ref(false);
@@ -424,6 +513,7 @@ export default defineComponent({
       expensesTableColumns,
       visibleColumns,
       showStatistic,
+      toggleCategoryDrawer,
       editExpense,
       deleteExpense,
       openEditDialog,
@@ -442,5 +532,16 @@ export default defineComponent({
 .team-header-buttons {
   width: 36px;
   height: 36px
+}
+
+.stats-card {
+  min-height: 120px;
+}
+
+.stats-icon-div {
+  height: 72px;
+  width: 72px;
+  margin-top: -36px;
+  background-color: rgb(255,164,22);
 }
 </style>

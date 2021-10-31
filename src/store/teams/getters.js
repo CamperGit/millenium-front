@@ -1,3 +1,7 @@
+export function getCategoryDrawerState(state) {
+  return state.categoryDrawer;
+}
+
 export function getCurrentTeam(state) {
   return state.currentTeam;
 }

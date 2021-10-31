@@ -1,9 +1,10 @@
 <template>
   <q-drawer
-    v-model="categoryDrawerRef"
+    v-model="categoryDrawer"
     elevated
     class="q-pa-none q-ma-none q-mr-sm"
     id="category-drawer"
+    @update:model-value="toggleDrawer"
   >
     <q-card flat style="height: 100%" square class="col-2">
       <q-card-section class=" q-pa-none q-py-sm row">
@@ -121,13 +122,13 @@ export default {
   setup(props) {
     const router = useRouter();
     const store = useStore();
-    const {isShowed} = toRefs(props);
 
     const isCanCreate = computed(() => store.getters['teams/getCreatePermission']);
     const isCanUpdate = computed(() => store.getters['teams/getChangingPermission']);
     const isCanDeleting = computed(() => store.getters['teams/getDeletingPermission']);
-
     const currentTeam = computed(()=> store.getters['teams/getCurrentTeam']);
+    const categoryDrawer = computed(()=> store.getters['teams/getCategoryDrawerState']);
+
     const categories = computed(() => store.getters['teams/getTeamCategories'])
     const selectedCategories = computed(() => store.getters['teams/getSelectedTeamCategories']);
     const addNewCategoryDialog = ref(false);
@@ -194,7 +195,9 @@ export default {
       editCategoryDialog.value = false;
     }
 
-
+    const toggleDrawer = () => {
+      store.commit('teams/toggleCategoryDrawer');
+    }
 
     onMounted(() => {
 
@@ -213,9 +216,10 @@ export default {
       isCanCreate,
       isCanUpdate,
       isCanDeleting,
-      categoryDrawerRef: isShowed,
       categoryEditName,
       categoryDeleteMode,
+      categoryDrawer,
+      toggleDrawer,
       createNewCategory,
       editCategory,
       deleteCategory,

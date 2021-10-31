@@ -1,6 +1,10 @@
 import {getCategoryIndex} from "src/services/expenses/categoryService";
 import {getExpenseIndex} from "src/services/expenses/expenseService";
 
+export function toggleCategoryDrawer(state) {
+  state.categoryDrawer = !state.categoryDrawer;
+}
+
 export function setCurrentTeam(state, team) {
   state.currentTeam = team;
   state.categories = team.categories;
