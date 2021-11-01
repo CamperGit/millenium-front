@@ -1,14 +1,15 @@
 import {stompClient} from "src/services/other/websocket";
 
 class ExpenseService {
-  createNewExpense(expense) {
-
-    stompClient.send("/millenium/createExpense", {}, JSON.stringify(createExpenseObject(expense)));
+  createNewExpense(expense, teamId) {
+    console.log(expense)
+    console.log(teamId)
+    let payload = {...createExpenseObject(expense), teamId};
+    stompClient.send("/millenium/createExpense", {}, JSON.stringify(payload));
   }
 
-  editExpense(expense) {
-    let payload = {...createExpenseObject(expense), expenseId : expense.editedExpenseId};
-    console.log(payload)
+  editExpense(expense, teamId) {
+    let payload = {...createExpenseObject(expense), expenseId : expense.editedExpenseId, teamId};
     stompClient.send("/millenium/editExpense", {}, JSON.stringify(payload));
   }
 
@@ -18,6 +19,7 @@ class ExpenseService {
 }
 
 function createExpenseObject(expense) {
+  console.log(expense)
   let fixedPrice = expense.expenseFixedPrice;
   let minPrice = expense.expenseMinPrice;
   let maxPrice = expense.expenseMaxPrice;
@@ -37,7 +39,7 @@ function createExpenseObject(expense) {
     categoryId: expense.expenseCategory,
     fixedPrice,
     minPrice,
-    maxPrice
+    maxPrice,
   };
 }
 

@@ -43,6 +43,13 @@ export default boot(async ({store}) => {
       store.commit('teams/addUnreadTeamJoinRequest', value);
     }
   });
+  addSubscription({
+    name: '/user/queue/teamMessagesUpdate', callback: (expense) => {
+      const value = JSON.parse(expense.body);
+      console.log(value)
+      store.commit('teams/addUnreadTeamMessage', value);
+    }
+  });
 
   try {
     const accessToken = store.getters['auth/getAccessToken'];

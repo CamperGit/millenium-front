@@ -267,6 +267,20 @@
             </q-item>
             <q-separator/>
           </template>
+          <template v-for="message of unReadTeamMessages" :key="message" >
+            <q-item class="q-ma-none">
+              <q-item-section avatar>
+                <q-avatar color="primary" text-color="white">
+                  <q-icon name="money_off"/>
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>{{message.text}}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-separator/>
+          </template>
           <q-item-label header>Просмотренные: </q-item-label>
           <q-separator/>
           <template v-for="joinRequest of readTeamJoinsRequests" :key="joinRequest" >
@@ -286,6 +300,20 @@
                   <q-btn :disable="!isCanModerating" rounded size="sm" color="green" icon="done" class="q-mr-sm" @click="applyJoinRequest(joinRequest)"></q-btn>
                   <q-btn :disable="!isCanModerating" rounded size="sm" color="red" icon="clear" @click="denyJoinRequest(joinRequest)"></q-btn>
                 </div>
+              </q-item-section>
+            </q-item>
+            <q-separator/>
+          </template>
+          <template v-for="message of readTeamMessages" :key="message" >
+            <q-item class="q-ma-none">
+              <q-item-section avatar>
+                <q-avatar color="primary" text-color="white">
+                  <q-icon name="money_off"/>
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>{{message.text}}</q-item-label>
               </q-item-section>
             </q-item>
             <q-separator/>
@@ -592,11 +620,11 @@ export default defineComponent({
     })
 
     const createNewExpense = (expense) => {
-      ExpensesService.createNewExpense(expense);
+      ExpensesService.createNewExpense(expense, currentTeam.value.teamId);
     }
 
     const editExpense = (expense) => {
-      ExpensesService.editExpense(expense);
+      ExpensesService.editExpense(expense, currentTeam.value.teamId);
     }
 
     const deleteExpense = (expense) => {
