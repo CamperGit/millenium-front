@@ -81,6 +81,16 @@ class TeamService {
       throw e;
     }
   }
+
+  async getTeamPermissions(teamId) {
+    try {
+      const {data} = await api.get("/teams/" + teamId +"/permissions");
+      return data;
+    } catch (e) {
+      console.log(e)
+      throw e;
+    }
+  }
 }
 
 export default new TeamService();

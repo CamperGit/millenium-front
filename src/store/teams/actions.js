@@ -23,6 +23,19 @@ export async function getTeamMessages({commit}, teamId) {
 
 }
 
+export async function getTeamPermissions({commit}, teamId) {
+  try {
+    const data = await TeamService.getTeamPermissions(teamId);
+    if (data) {
+      commit('setTeamPermissions', data)
+      return data;
+    }
+  } catch (e) {
+    console.log(e)
+    throw e;
+  }
+}
+
 export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
   try {
     const data = await PermissionService.getUserPermissionInTeam(userId, teamId);

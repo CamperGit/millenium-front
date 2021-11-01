@@ -16,7 +16,7 @@
           <q-btn icon="notifications" flat class="team-header-buttons" @click="notificationsDialog = true">
             <q-badge v-if="numberOfUnreadMessages !== 0" color="red" floating>{{ numberOfUnreadMessages }}</q-badge>
           </q-btn>
-          <q-btn v-if="isCanModerating" icon="settings" flat class="team-header-buttons"/>
+          <q-btn v-if="isCanModerating" icon="settings" flat class="team-header-buttons" @click="openPermissionsDialog"/>
         </q-card-section>
         <q-slide-transition :duration="800">
           <div v-show="showStatistic">
@@ -238,7 +238,6 @@
         </q-list>
       </q-card>
     </q-dialog>
-
     <q-dialog v-model="notificationsDialog">
       <q-card flat class="q-pa-none notifications-dialog-card" >
         <q-toolbar class="bg-purple text-white shadow-2">
@@ -319,6 +318,41 @@
             <q-separator/>
           </template>
         </q-list>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="permissionsDialog">
+      <q-card flat class="q-pa-none" style="width: 720px">
+        <q-toolbar class="bg-purple text-white shadow-2">
+          <q-toolbar-title>Разрешения пользователей:</q-toolbar-title>
+        </q-toolbar>
+
+        <q-list bordered >
+          <template v-for="permission of permissionsToEdit" :key="permission">
+            <q-item class="q-ma-none">
+              <q-item-section avatar>
+                <q-avatar color="primary" text-color="white">
+                  {{ permission.username.substr(0,1) }}
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>{{permission.username}}</q-item-label>
+              </q-item-section>
+              <q-item-section class="row" avatar>
+                <div class="row">
+                  <q-checkbox keep-color v-model="permission.reading" label="Чтение" color="orange" />
+                  <q-checkbox keep-color v-model="permission.adding" label="Добавление" color="orange" />
+                  <q-checkbox keep-color v-model="permission.changing" label="Редактирование" color="orange" />
+                  <q-checkbox keep-color v-model="permission.deleting" label="Удаление" color="orange" />
+                  <q-checkbox keep-color v-model="permission.moderating" label="Администрирование" color="orange" />
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-separator/>
+          </template>
+        </q-list>
+        <q-btn label="Сохранить" @click="editUsersPermissions(permissionsToEdit)"></q-btn>
       </q-card>
     </q-dialog>
 
@@ -515,10 +549,12 @@ export default defineComponent({
     const categoryDrawer = ref(true);
     const teamSelectDialog = ref(false);
     const notificationsDialog = ref(false);
+    const permissionsDialog = ref(false);
     const yearFilterSelect = ref(0);
     const yearSelectColumns = ref([]);
     const monthFilterSelect = ref(0);
     const currentTeam = computed(() => store.getters['teams/getCurrentTeam']);
+    const teamPermissions = computed(() => store.getters['teams/getTeamUsersPermissions'])
     const unReadTeamJoinsRequests = computed(() => store.getters['teams/getUnReadJoinsRequests']);
     const unReadTeamMessages = computed(()=> store.getters['teams/getUnReadTeamMessages']);
     const readTeamJoinsRequests = computed(()=> store.getters['teams/getReadJoinsRequests']);
@@ -709,12 +745,16 @@ export default defineComponent({
     })
 
     const loadPageInfo = async (user, team) => {
+      const teamId = team.teamId;
       await store.dispatch('teams/setCurrentTeamAction', team);
       await store.dispatch('teams/getUserPermissionInTeam', {
         userId: user.id,
-        teamId: team.teamId
+        teamId
       })
-      await store.dispatch('teams/getTeamInvites', team.teamId);
+      if (isCanModerating.value) {
+        await store.dispatch('teams/getTeamPermissions', teamId)
+      }
+      await store.dispatch('teams/getTeamInvites', teamId);
       const dateOfCreateApp = new Date(2021, 9, 31);
 
       const currentDate = new Date();
@@ -747,6 +787,34 @@ export default defineComponent({
 
     const selectCurrentTeam = async (team) => {
       await loadPageInfo(currentUser.value, team)
+    }
+
+    const permissionsToEdit = ref([]);
+
+    const getPermissionsToEdit = () => {
+      let array = [];
+      for (let permission of teamPermissions.value) {
+        array.push({
+          userId : permission.permissions.userId,
+          teamId : permission.permissions.teamId,
+          reading : permission.permissions.reading,
+          adding : permission.permissions.adding,
+          deleting : permission.permissions.deleting,
+          changing : permission.permissions.changing,
+          moderating : permission.permissions.moderating,
+          username : permission.username
+        });
+      }
+      return array;
+    }
+
+    const openPermissionsDialog = () => {
+      permissionsDialog.value = true;
+      permissionsToEdit.value = getPermissionsToEdit();
+    }
+
+    const editUsersPermissions = (permissions) => {
+
     }
 
     watch(notificationsDialog, (val)=> {
@@ -837,6 +905,11 @@ export default defineComponent({
       readTeamJoinsRequests,
       readTeamMessages,
       numberOfUnreadMessages,
+      teamPermissions,
+      permissionsDialog,
+      permissionsToEdit,
+      editUsersPermissions,
+      openPermissionsDialog,
       applyJoinRequest,
       denyJoinRequest,
       selectCurrentTeam,

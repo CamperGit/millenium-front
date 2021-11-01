@@ -7,7 +7,7 @@ export function toggleCategoryDrawer(state) {
 export function clearInfo(state) {
   state.currentTeam = null;
   state.teamLimit = null;
-  state.permissions = {};
+  state.currentUserPermissions = {};
   state.categories = [];
   state.selectedCategories = [];
   state.teamInvites = [];
@@ -178,7 +178,11 @@ export function deleteExpense(state, expense) {
 
 export function setPermissions(state, permissions) {
   if (permissions) {
-    state.permissions = permissions;
+    state.currentUserPermissions = permissions;
   }
+}
+
+export function setTeamPermissions(state, teamPermissions) {
+  state.teamPermissions = teamPermissions;
 }
 

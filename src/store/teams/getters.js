@@ -34,30 +34,34 @@ export function getReadTeamMessages(state) {
   return state.readTeamMessages;
 }
 
+export function getTeamUsersPermissions(state) {
+  return state.teamPermissions;
+}
+
 export function getCreatePermission(state) {
-  if (state.permissions) {
-    return state.permissions.adding;
+  if (state.currentUserPermissions) {
+    return state.currentUserPermissions.adding;
   }
   return false;
 }
 
 export function getChangingPermission(state) {
-  if (state.permissions) {
-    return state.permissions.changing;
+  if (state.currentUserPermissions) {
+    return state.currentUserPermissions.changing;
   }
   return false;
 }
 
 export function getDeletingPermission(state) {
-  if (state.permissions) {
-    return state.permissions.deleting;
+  if (state.currentUserPermissions) {
+    return state.currentUserPermissions.deleting;
   }
   return false;
 }
 
 export function getModeratingPermission(state) {
-  if (state.permissions) {
-    return state.permissions.moderating;
+  if (state.currentUserPermissions) {
+    return state.currentUserPermissions.moderating;
   }
   return false;
 }

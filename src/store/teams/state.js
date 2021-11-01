@@ -1,7 +1,8 @@
 export default function () {
   return {
     currentTeam : {},
-    permissions : {},
+    currentUserPermissions : {},
+    teamPermissions : [],
     categories : [],
     selectedCategories : [],
     teamLimit : null,

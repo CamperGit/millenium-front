@@ -14,6 +14,10 @@ class PermissionService {
       throw e
     }
   }
+
+  async editUserPermissions(permissions) {
+
+  }
 }
 
 export default new PermissionService();
