@@ -13,10 +13,9 @@
           <q-btn no-caps flat @click="teamSelectDialog = true">
             <u>Сменить рабочее пространство</u>
           </q-btn>
-          <!--          <span style="margin-right: 10px">
-                      {{ currentTeam.name }}
-                    </span>-->
-          <q-btn icon="notifications" flat class="team-header-buttons"/>
+          <q-btn icon="notifications" flat class="team-header-buttons" @click="notificationsDialog = true">
+            <q-badge v-if="numberOfUnreadMessages !== 0" color="red" floating>{{ numberOfUnreadMessages }}</q-badge>
+          </q-btn>
           <q-btn v-if="isCanModerating" icon="settings" flat class="team-header-buttons"/>
         </q-card-section>
         <q-slide-transition :duration="800">
@@ -215,27 +214,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-<!--    <q-dialog v-model="teamSelectDialog" persistent>
-      <q-card class="q-pa-sm" style="width: 410px">
-        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
-          <h6 class="q-pa-none q-my-sm">Выберите организацию:</h6>
-        </q-card-section>
-        <q-card-section class="q-mx-sm q-py-none">
-          <q-list>
-            <template v-for="team of currentUser.teams" :key="team">
-              <q-item clickable >
-                <q-item-section>
-                  <q-item-label>
-                    {{team.name}}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-list>
-        </q-card-section>
-      </q-card>
-    </q-dialog>-->
-    <q-dialog v-model="teamSelectDialog">
+    <q-dialog v-model="teamSelectDialog" persistent>
       <q-card flat class="q-pa-none" style="max-width: 350px; width: 350px">
         <q-toolbar class="bg-primary text-white shadow-2">
           <q-toolbar-title>Выберите организацию</q-toolbar-title>
@@ -252,6 +231,38 @@
 
               <q-item-section>
                 <q-item-label>{{team.name}}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-separator/>
+          </template>
+        </q-list>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="notificationsDialog">
+      <q-card flat class="q-pa-none notifications-dialog-card" >
+        <q-toolbar class="bg-purple text-white shadow-2">
+          <q-toolbar-title>Уведомления</q-toolbar-title>
+        </q-toolbar>
+
+        <q-list bordered >
+          <template v-for="joinRequest of unReadTeamJoinsRequests" :key="joinRequest" >
+            <q-item class="q-ma-none">
+              <q-item-section avatar>
+                <q-avatar color="primary" text-color="white">
+                  <q-icon name="person_add"/>
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Пользователь {{joinRequest.user.username}} хочет вступить в вашу организацию. Желаете добавить?</q-item-label>
+              </q-item-section>
+
+              <q-item-section avatar class="row">
+                <div class="row">
+                  <q-btn rounded size="sm" color="green" icon="done" class="q-mr-sm" @click="applyJoinRequest(joinRequest)"></q-btn>
+                  <q-btn rounded size="sm" color="red" icon="clear" @click="denyJoinRequest(joinRequest)"></q-btn>
+                </div>
               </q-item-section>
             </q-item>
             <q-separator/>
@@ -448,14 +459,19 @@ export default defineComponent({
     const isCanCreate = computed(() => store.getters['teams/getCreatePermission']);
     const isCanUpdate = computed(() => store.getters['teams/getChangingPermission']);
     const isCanDeleting = computed(() => store.getters['teams/getDeletingPermission']);
-    const isCanModerating = computed(() => store.getters['teams/getModeratingPermission']);
+    const isCanModerating = computed(() => store.getters['teams/getModeratingPermission'])
 
     const categoryDrawer = ref(true);
     const teamSelectDialog = ref(false);
+    const notificationsDialog = ref(false);
     const yearFilterSelect = ref(0);
     const yearSelectColumns = ref([]);
     const monthFilterSelect = ref(0);
     const currentTeam = computed(() => store.getters['teams/getCurrentTeam']);
+    const unReadTeamJoinsRequests = computed(() => store.getters['teams/getUnReadJoinsRequests']);
+    const unReadTeamMessages = computed(()=> store.getters['teams/getUnReadTeamMessages']);
+    const readTeamJoinsRequests = computed(()=> store.getters['teams/getReadJoinsRequests']);
+    const readTeamMessages = computed(()=> store.getters['teams/getReadTeamMessages']);
     const teamLimit = computed(() => store.getters['teams/getTeamLimit']);
     const categories = computed(() => store.getters['teams/getTeamCategories']);
     const selectedCategories = computed(() => store.getters['teams/getSelectedTeamCategories']);
@@ -647,6 +663,7 @@ export default defineComponent({
         userId: user.id,
         teamId: team.teamId
       })
+      await store.dispatch('teams/getTeamInvites', team.teamId);
       const dateOfCreateApp = new Date(2021, 9, 31);
 
       const currentDate = new Date();
@@ -658,6 +675,23 @@ export default defineComponent({
       yearSelectColumns.value = yearsArray;
       yearFilterSelect.value = currentDate.getFullYear();
       monthFilterSelect.value = currentDate.getMonth();
+      store.commit('teams/setTeamLimitByYearAndMonth', {year: yearFilterSelect.value, month: monthFilterSelect.value})
+    }
+
+    const numberOfUnreadMessages = computed(()=> {
+      if (unReadTeamJoinsRequests.value && unReadTeamMessages.value) {
+        return unReadTeamJoinsRequests.value.length + unReadTeamMessages.value.length;
+      } else {
+        return 0;
+      }
+    });
+
+    const applyJoinRequest = async (joinRequest) => {
+      await store.dispatch('teams/applyJoinRequest', joinRequest);
+    }
+
+    const denyJoinRequest = async (joinRequest) => {
+      await store.dispatch('teams/denyJoinRequest', joinRequest);
     }
 
     const selectCurrentTeam = async (team) => {
@@ -740,6 +774,14 @@ export default defineComponent({
       teamLimitInput,
       teamSelectDialog,
       currentUser,
+      notificationsDialog,
+      unReadTeamJoinsRequests,
+      unReadTeamMessages,
+      readTeamJoinsRequests,
+      readTeamMessages,
+      numberOfUnreadMessages,
+      applyJoinRequest,
+      denyJoinRequest,
       selectCurrentTeam,
       editTeamLimit,
       openTeamLimitDialog,
@@ -779,5 +821,12 @@ export default defineComponent({
   font-weight: bold;
   font-size: 32px;
   margin-top: -10px
+}
+
+.notifications-dialog-card {
+  max-width: 500px;
+  width: 500px;
+  height: 600px;
+  max-height: 600px;
 }
 </style>

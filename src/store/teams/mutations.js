@@ -4,13 +4,57 @@ export function toggleCategoryDrawer(state) {
   state.categoryDrawer = !state.categoryDrawer;
 }
 
+export function clearInfo(state) {
+  state.currentTeam = null;
+  state.teamLimit = null;
+  state.permissions = {};
+  state.categories = [];
+  state.selectedCategories = [];
+  state.teamInvites = [];
+  state.teamMessages = [];
+}
+
 export function setCurrentTeam(state, team) {
-  console.log(team)
   state.currentTeam = team;
 }
 
 export function setCategories(state, categories) {
   state.categories = categories;
+}
+
+export function removeJoinRequest(state, request) {
+  let index = getIndexOfObject(state.readTeamInvites, 'limitId', request.limitId);
+  if (index !== -1) {
+    state.readTeamInvites.splice(index, 1);
+  }
+  index = getIndexOfObject(state.unReadTeamInvites, 'limitId', request.limitId);
+  if (index !== -1) {
+    state.unReadTeamInvites.splice(index, 1);
+  }
+}
+
+export function addUnreadTeamJoinRequests(state, requests) {
+  state.unReadTeamInvites.push.apply(state.unReadTeamInvites, requests);
+}
+
+export function addUnreadTeamJoinRequest(state, request) {
+  state.unReadTeamInvites.push(request);
+}
+
+export function addUnreadTeamMessage(state, message) {
+  state.unReadTeamMessages.push(message);
+}
+
+export function readTeamJoins(state) {
+  let unReadJoins = state.unReadTeamInvites;
+  state.readTeamInvites.push.apply(state.readTeamInvites, unReadJoins);
+  unReadJoins.splice(0, unReadJoins.length);
+}
+
+export function readTeamMessages(state) {
+  let unReadMessages = state.unReadTeamMessages;
+  state.readTeamMessages.push.apply(state.readTeamMessages, unReadMessages);
+  unReadMessages.splice(0, unReadMessages.length);
 }
 
 export function updateTeamLimit(state, updatedLimit) {

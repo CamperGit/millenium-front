@@ -40,7 +40,7 @@ export default boot(async ({store}) => {
   addSubscription({
     name: '/user/queue/joinRequestUpdate', callback: (expense) => {
       const value = JSON.parse(expense.body);
-      console.log(value)
+      store.commit('teams/addUnreadTeamJoinRequest', value);
     }
   });
 

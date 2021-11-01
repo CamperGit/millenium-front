@@ -18,6 +18,22 @@ export function getSelectedTeamCategories(state) {
   return state.selectedCategories;
 }
 
+export function getUnReadJoinsRequests(state) {
+  return state.unReadTeamInvites;
+}
+
+export function getUnReadTeamMessages(state) {
+  return state.unReadTeamMessages;
+}
+
+export function getReadJoinsRequests(state) {
+  return state.readTeamInvites
+}
+
+export function getReadTeamMessages(state) {
+  return state.readTeamMessages;
+}
+
 export function getCreatePermission(state) {
   if (state.permissions) {
     return state.permissions.adding;

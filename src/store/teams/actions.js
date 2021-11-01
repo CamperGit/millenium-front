@@ -10,6 +10,19 @@ export async function createNewTeam ( {commit}, {name, userId}) {
   }
 }
 
+export async function getTeamInvites({commit}, teamId) {
+  try {
+    const data = await TeamService.getTeamInvites(teamId);
+    commit('addUnreadTeamJoinRequests', data);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function getTeamMessages({commit}, teamId) {
+
+}
+
 export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
   try {
     const data = await PermissionService.getUserPermissionInTeam(userId, teamId);
@@ -24,9 +37,25 @@ export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
 }
 
 export function setCurrentTeamAction({commit}, team) {
+  commit('clearInfo');
   commit('setCurrentTeam', team)
   commit('setCategories', team.categories)
   commit('selectAllCategories');
+}
+
+export function clearNotifications({commit}) {
+  commit('readTeamJoins');
+  commit('readTeamMessages');
+}
+
+export async function applyJoinRequest({commit}, request) {
+  const state = await TeamService.applyJoinRequest(request.inviteId);
+  commit('removeJoinRequest', request);
+}
+
+export async function denyJoinRequest({commit}, request) {
+  const state = await TeamService.denyJoinRequest(request.inviteId);
+  commit('removeJoinRequest', request);
 }
 
 export function addSelectedCategoryAction({commit, state}, category) {
