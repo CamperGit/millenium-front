@@ -43,7 +43,7 @@ export function setCurrentTeamAction({commit}, team) {
   commit('selectAllCategories');
 }
 
-export function clearNotifications({commit}) {
+export function readNotifications({commit}) {
   commit('readTeamJoins');
   commit('readTeamMessages');
 }

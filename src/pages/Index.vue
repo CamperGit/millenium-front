@@ -246,7 +246,31 @@
         </q-toolbar>
 
         <q-list bordered >
+
           <template v-for="joinRequest of unReadTeamJoinsRequests" :key="joinRequest" >
+            <q-item class="q-ma-none">
+              <q-item-section avatar>
+                <q-avatar color="primary" text-color="white">
+                  <q-icon name="person_add"/>
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Пользователь {{joinRequest.user.username}} хочет вступить в вашу организацию. Желаете добавить?</q-item-label>
+              </q-item-section>
+
+              <q-item-section avatar class="row">
+                <div class="row">
+                  <q-btn rounded size="sm" color="green" icon="done" class="q-mr-sm" @click="applyJoinRequest(joinRequest)"></q-btn>
+                  <q-btn rounded size="sm" color="red" icon="clear" @click="denyJoinRequest(joinRequest)"></q-btn>
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-separator/>
+          </template>
+          <q-item-label header>Просмотренные: </q-item-label>
+          <q-separator/>
+          <template v-for="joinRequest of readTeamJoinsRequests" :key="joinRequest" >
             <q-item class="q-ma-none">
               <q-item-section avatar>
                 <q-avatar color="primary" text-color="white">
@@ -697,6 +721,12 @@ export default defineComponent({
     const selectCurrentTeam = async (team) => {
       await loadPageInfo(currentUser.value, team)
     }
+
+    watch(notificationsDialog, (val)=> {
+      if (!val) {
+        store.dispatch('teams/readNotifications');
+      }
+    })
 
     watch(expenseDialog, (val) => {
       if (!val && expenseEditMode.value) {
