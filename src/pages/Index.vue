@@ -246,7 +246,6 @@
         </q-toolbar>
 
         <q-list bordered >
-
           <template v-for="joinRequest of unReadTeamJoinsRequests" :key="joinRequest" >
             <q-item class="q-ma-none">
               <q-item-section avatar>
@@ -261,8 +260,8 @@
 
               <q-item-section avatar class="row">
                 <div class="row">
-                  <q-btn rounded size="sm" color="green" icon="done" class="q-mr-sm" @click="applyJoinRequest(joinRequest)"></q-btn>
-                  <q-btn rounded size="sm" color="red" icon="clear" @click="denyJoinRequest(joinRequest)"></q-btn>
+                  <q-btn :disable="!isCanModerating" rounded size="sm" color="green" icon="done" class="q-mr-sm" @click="applyJoinRequest(joinRequest)"></q-btn>
+                  <q-btn :disable="!isCanModerating" rounded size="sm" color="red" icon="clear" @click="denyJoinRequest(joinRequest)"></q-btn>
                 </div>
               </q-item-section>
             </q-item>
@@ -282,10 +281,10 @@
                 <q-item-label>Пользователь {{joinRequest.user.username}} хочет вступить в вашу организацию. Желаете добавить?</q-item-label>
               </q-item-section>
 
-              <q-item-section avatar class="row">
+              <q-item-section avatar class="row" >
                 <div class="row">
-                  <q-btn rounded size="sm" color="green" icon="done" class="q-mr-sm" @click="applyJoinRequest(joinRequest)"></q-btn>
-                  <q-btn rounded size="sm" color="red" icon="clear" @click="denyJoinRequest(joinRequest)"></q-btn>
+                  <q-btn :disable="!isCanModerating" rounded size="sm" color="green" icon="done" class="q-mr-sm" @click="applyJoinRequest(joinRequest)"></q-btn>
+                  <q-btn :disable="!isCanModerating" rounded size="sm" color="red" icon="clear" @click="denyJoinRequest(joinRequest)"></q-btn>
                 </div>
               </q-item-section>
             </q-item>

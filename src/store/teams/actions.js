@@ -13,7 +13,7 @@ export async function createNewTeam ( {commit}, {name, userId}) {
 export async function getTeamInvites({commit}, teamId) {
   try {
     const data = await TeamService.getTeamInvites(teamId);
-    commit('addUnreadTeamJoinRequests', data);
+    commit('setUnreadTeamJoinRequests', data);
   } catch (e) {
     console.log(e);
   }

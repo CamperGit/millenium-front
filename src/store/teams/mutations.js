@@ -33,8 +33,10 @@ export function removeJoinRequest(state, request) {
   }
 }
 
-export function addUnreadTeamJoinRequests(state, requests) {
-  state.unReadTeamInvites.push.apply(state.unReadTeamInvites, requests);
+export function setUnreadTeamJoinRequests(state, requests) {
+  if (requests) {
+    state.unReadTeamInvites = requests;
+  }
 }
 
 export function addUnreadTeamJoinRequest(state, request) {
