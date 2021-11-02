@@ -273,6 +273,6 @@ export default {
 
 .categories-list-active {
   color: white;
-  background: rgba(25, 118, 210, 0.8);
+  background: #A53AB5FF;
 }
 </style>

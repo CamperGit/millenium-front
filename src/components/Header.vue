@@ -1,5 +1,5 @@
 <template>
-  <q-toolbar style="border-radius: 0" class="bg-blue text-white shadow-2 q-pa-none">
+  <q-toolbar style="border-radius: 0" class="bg-secondary text-white shadow-2 q-pa-none">
     <q-tabs v-model="pageTab" shrink>
       <q-route-tab no-caps name="index" label="Расходы" to="/"/>
       <q-route-tab no-caps name="teamCreate" label="Создание организации"  to="/team/create"/>

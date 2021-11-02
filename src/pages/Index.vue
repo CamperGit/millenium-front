@@ -108,7 +108,6 @@
         </q-card-section>
         <q-card-section class="col-12">
           <q-table
-            title="Treats"
             :rows="selectedExpenses"
             :columns="expensesTableColumns"
             row-key="expenseId"
@@ -140,7 +139,7 @@
                   v-for="col in props.cols"
                   :key="col.name"
                   :props="props"
-                  style="color: rgba(25, 118, 210, 0.8); font-size: 15px; font-weight: 600"
+                  style="color: #A53AB5FF; font-size: 15px; font-weight: 600"
                 >
                   {{ col.label }}
                 </q-th>
@@ -227,7 +226,7 @@
           <template v-for="team of currentUser.teams" :key="team.teamId" >
             <q-item class="q-ma-none" clickable @click="selectCurrentTeam(team)" v-close-popup v-ripple>
               <q-item-section avatar>
-                <q-avatar color="primary" text-color="white">
+                <q-avatar color="accent" text-color="white">
                   {{ team.name.substr(0,1) }}
                 </q-avatar>
               </q-item-section>
@@ -251,7 +250,7 @@
           <template v-for="joinRequest of unReadTeamJoinsRequests" :key="joinRequest" >
             <q-item class="q-ma-none">
               <q-item-section avatar>
-                <q-avatar color="primary" text-color="white">
+                <q-avatar color="accent" text-color="white">
                   <q-icon name="person_add"/>
                 </q-avatar>
               </q-item-section>
@@ -272,7 +271,7 @@
           <template v-for="message of unReadTeamMessages" :key="message" >
             <q-item class="q-ma-none">
               <q-item-section avatar>
-                <q-avatar color="primary" text-color="white">
+                <q-avatar color="accent" text-color="white">
                   <q-icon name="money_off"/>
                 </q-avatar>
               </q-item-section>
@@ -288,7 +287,7 @@
           <template v-for="joinRequest of readTeamJoinsRequests" :key="joinRequest" >
             <q-item class="q-ma-none">
               <q-item-section avatar>
-                <q-avatar color="primary" text-color="white">
+                <q-avatar color="accent" text-color="white">
                   <q-icon name="person_add"/>
                 </q-avatar>
               </q-item-section>
@@ -309,7 +308,7 @@
           <template v-for="message of readTeamMessages" :key="message" >
             <q-item class="q-ma-none">
               <q-item-section avatar>
-                <q-avatar color="primary" text-color="white">
+                <q-avatar color="accent" text-color="white">
                   <q-icon name="money_off"/>
                 </q-avatar>
               </q-item-section>
@@ -333,7 +332,7 @@
           <template v-for="permission of permissionsToEdit" :key="permission">
             <q-item class="q-ma-none">
               <q-item-section avatar>
-                <q-avatar color="primary" text-color="white">
+                <q-avatar color="accent" text-color="white">
                   {{ permission.username.substr(0,1) }}
                 </q-avatar>
               </q-item-section>
