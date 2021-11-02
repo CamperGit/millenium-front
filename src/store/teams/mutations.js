@@ -7,7 +7,7 @@ export function toggleCategoryDrawer(state) {
 export function clearInfo(state) {
   state.currentTeam = null;
   state.teamLimit = null;
-  state.currentUserPermissions = {};
+  state.currentUserPermissions = null;
   state.categories = [];
   state.selectedCategories = [];
   state.teamInvites = [];
@@ -184,5 +184,27 @@ export function setPermissions(state, permissions) {
 
 export function setTeamPermissions(state, teamPermissions) {
   state.teamPermissions = teamPermissions;
+  if (state.currentUserPermissions !== null) {
+    for (let permission of teamPermissions) {
+      if (permission.permissions.userId === state.currentUserPermissions.permissions.userId) {
+        state.currentUserPermissions = permission;
+        break;
+      }
+    }
+  }
 }
 
+export function removeUserFromTeam(state, deletedPermission) {
+  let teamPermissions = state.teamPermissions;
+  let index = -1;
+  for (let i = 0; i < teamPermissions.length; i++ ) {
+    let permission = teamPermissions[i];
+    if (permission.permissions.userId === deletedPermission.userId && permission.permissions.teamId === deletedPermission.teamId) {
+      index = i;
+      break;
+    }
+  }
+  if (index !== -1) {
+    teamPermissions.splice(index, 1);
+  }
+}

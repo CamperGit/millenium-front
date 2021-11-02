@@ -38,30 +38,34 @@ export function getTeamUsersPermissions(state) {
   return state.teamPermissions;
 }
 
+export function getCurrentUserPermissions(state) {
+  return state.currentUserPermissions;
+}
+
 export function getCreatePermission(state) {
   if (state.currentUserPermissions) {
-    return state.currentUserPermissions.adding;
+    return state.currentUserPermissions.permissions.adding;
   }
   return false;
 }
 
 export function getChangingPermission(state) {
   if (state.currentUserPermissions) {
-    return state.currentUserPermissions.changing;
+    return state.currentUserPermissions.permissions.changing;
   }
   return false;
 }
 
 export function getDeletingPermission(state) {
   if (state.currentUserPermissions) {
-    return state.currentUserPermissions.deleting;
+    return state.currentUserPermissions.permissions.deleting;
   }
   return false;
 }
 
 export function getModeratingPermission(state) {
   if (state.currentUserPermissions) {
-    return state.currentUserPermissions.moderating;
+    return state.currentUserPermissions.permissions.moderating;
   }
   return false;
 }

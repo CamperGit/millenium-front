@@ -36,7 +36,16 @@ export async function getTeamPermissions({commit}, teamId) {
   }
 }
 
-export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
+export function setUserPermission({commit, state}, userId) {
+  for (let permission of state.teamPermissions) {
+    console.log({permId : permission.permissions.userId, userId})
+    if (permission.permissions.userId === userId) {
+      commit('setPermissions', permission)
+    }
+  }
+}
+
+/*export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
   try {
     const data = await PermissionService.getUserPermissionInTeam(userId, teamId);
     if (data) {
@@ -47,7 +56,7 @@ export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
     console.log(e)
     throw e;
   }
-}
+}*/
 
 export function setCurrentTeamAction({commit}, team) {
   commit('clearInfo');

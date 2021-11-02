@@ -5,7 +5,7 @@ import {addSubscription, connect, stompClient} from "src/services/other/websocke
 import EventBus from "src/common/eventBus";
 
 
-export default boot(async ({store}) => {
+export default boot(async ({store, router}) => {
   addSubscription({
     name: '/user/queue/categoriesUpdating', callback: (category) => {
       const value = JSON.parse(category.body);
@@ -32,22 +32,40 @@ export default boot(async ({store}) => {
     }
   });
   addSubscription({
-    name: '/user/queue/updateTeamLimit', callback: (expense) => {
-      const value = JSON.parse(expense.body);
+    name: '/user/queue/updateTeamLimit', callback: (teamLimit) => {
+      const value = JSON.parse(teamLimit.body);
       store.commit('teams/updateTeamLimit', value);
     }
   });
   addSubscription({
-    name: '/user/queue/joinRequestUpdate', callback: (expense) => {
-      const value = JSON.parse(expense.body);
+    name: '/user/queue/joinRequestUpdate', callback: (joinRequest) => {
+      const value = JSON.parse(joinRequest.body);
       store.commit('teams/addUnreadTeamJoinRequest', value);
     }
   });
   addSubscription({
-    name: '/user/queue/teamMessagesUpdate', callback: (expense) => {
-      const value = JSON.parse(expense.body);
-      console.log(value)
+    name: '/user/queue/teamMessagesUpdate', callback: (teamMessage) => {
+      const value = JSON.parse(teamMessage.body);
       store.commit('teams/addUnreadTeamMessage', value);
+    }
+  });
+  addSubscription({
+    name: '/user/queue/updateTeamPermissions', callback: (permissions) => {
+      const value = JSON.parse(permissions.body);
+      store.commit('teams/setTeamPermissions', value);
+    }
+  });
+  addSubscription({
+    name: '/user/queue/deletedPermissions', callback: (permission) => {
+      const value = JSON.parse(permission.body);
+      store.commit('teams/removeUserFromTeam', value);
+      const currentUserPermissions = store.getters['teams/getCurrentUserPermissions'];
+      if (currentUserPermissions !== null) {
+        if (currentUserPermissions.permissions.userId === value.userId && currentUserPermissions.permissions.teamId === value.teamId) {
+          store.commit('teams/clearInfo');
+          router.push('/team/create');
+        }
+      }
     }
   });
 

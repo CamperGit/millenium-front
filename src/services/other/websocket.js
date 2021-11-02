@@ -19,7 +19,6 @@ export function connect( accessToken) {
     let token = accessToken.type + ' ' + accessToken.token;
     stompClient.connect({Authorization: token}, frame => {
       console.log('Connected: ' + frame);
-      console.log(subscriptions)
       subscriptions.forEach(subscription => {
         stompClient.subscribe(subscription.name, subscription.callback)
       })

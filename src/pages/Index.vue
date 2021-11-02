@@ -322,7 +322,7 @@
     </q-dialog>
 
     <q-dialog v-model="permissionsDialog">
-      <q-card flat class="q-pa-none" style="width: 720px">
+      <q-card flat class="q-pa-none" style="width: 640px; min-width: 640px">
         <q-toolbar class="bg-purple text-white shadow-2">
           <q-toolbar-title>Разрешения пользователей:</q-toolbar-title>
         </q-toolbar>
@@ -336,23 +336,38 @@
                 </q-avatar>
               </q-item-section>
 
-              <q-item-section>
-                <q-item-label>{{permission.username}}</q-item-label>
+              <q-item-section style="max-width: 100px">
+                <q-item-label  style="max-width: 100px">{{permission.username}}</q-item-label>
               </q-item-section>
-              <q-item-section class="row" avatar>
-                <div class="row">
-                  <q-checkbox keep-color v-model="permission.reading" label="Чтение" color="orange" />
-                  <q-checkbox keep-color v-model="permission.adding" label="Добавление" color="orange" />
-                  <q-checkbox keep-color v-model="permission.changing" label="Редактирование" color="orange" />
-                  <q-checkbox keep-color v-model="permission.deleting" label="Удаление" color="orange" />
-                  <q-checkbox keep-color v-model="permission.moderating" label="Администрирование" color="orange" />
+              <q-item-section class="q-mr-sm">
+                <div>
+                  <q-checkbox keep-color v-model="permission.permissions.reading" label="Чтение" color="orange" />
+                  <q-checkbox keep-color v-model="permission.permissions.adding" label="Добавление" color="orange" />
+                  <q-checkbox keep-color v-model="permission.permissions.moderating" label="Администрирование" color="orange" />
                 </div>
+              </q-item-section>
+              <q-item-section >
+                <div class="column justify-start" style="height: 100%">
+                  <div class="col-4">
+                    <q-checkbox class="col-4" keep-color v-model="permission.permissions.changing" label="Редактирование" color="orange" />
+                  </div>
+                  <div class="col-4">
+                    <q-checkbox class="col-4" keep-color v-model="permission.permissions.deleting" label="Удаление" color="orange" />
+                  </div>
+                </div>
+              </q-item-section>
+              <q-space/>
+              <q-item-section class="q-ml-md" avatar>
+                <q-btn style="width: 110px" label="Исключить" color="red-4" @click="kickUserFromTeam(permission.permissions)" no-caps/>
               </q-item-section>
             </q-item>
             <q-separator/>
           </template>
         </q-list>
-        <q-btn label="Сохранить" @click="editUsersPermissions(permissionsToEdit)"></q-btn>
+        <q-card-actions class="row justify-center items-center">
+          <q-btn style="width: 110px" no-caps color="primary" label="Сохранить" @click="editUsersPermissions(permissionsToEdit)" v-close-popup></q-btn>
+          <q-btn style="width: 110px" no-caps label="Отмена" v-close-popup></q-btn>
+        </q-card-actions>
       </q-card>
     </q-dialog>
 
@@ -366,6 +381,7 @@ import {useStore} from "vuex"
 import {connect, isConnected} from "src/services/other/websocket";
 import ExpensesService from "src/services/expenses/expenseService";
 import TeamService from "src/services/team/teamService";
+import PermissionService from "src/services/team/permissionService"
 import CategoriesDrawer from "components/CategoriesDrawer";
 import {daysInMonth} from "src/services/other/tools";
 
@@ -745,15 +761,14 @@ export default defineComponent({
     })
 
     const loadPageInfo = async (user, team) => {
+      const userId = user.id;
       const teamId = team.teamId;
       await store.dispatch('teams/setCurrentTeamAction', team);
-      await store.dispatch('teams/getUserPermissionInTeam', {
+      await store.dispatch('teams/getTeamPermissions', teamId)
+      await store.dispatch('teams/setUserPermission', userId);
+      /*await store.dispatch('teams/getUserPermissionInTeam', {
         userId: user.id,
-        teamId
-      })
-      if (isCanModerating.value) {
-        await store.dispatch('teams/getTeamPermissions', teamId)
-      }
+      })*/
       await store.dispatch('teams/getTeamInvites', teamId);
       const dateOfCreateApp = new Date(2021, 9, 31);
 
@@ -795,13 +810,15 @@ export default defineComponent({
       let array = [];
       for (let permission of teamPermissions.value) {
         array.push({
-          userId : permission.permissions.userId,
-          teamId : permission.permissions.teamId,
-          reading : permission.permissions.reading,
-          adding : permission.permissions.adding,
-          deleting : permission.permissions.deleting,
-          changing : permission.permissions.changing,
-          moderating : permission.permissions.moderating,
+          permissions : {
+            userId : permission.permissions.userId,
+            teamId : permission.permissions.teamId,
+            reading : permission.permissions.reading,
+            adding : permission.permissions.adding,
+            deleting : permission.permissions.deleting,
+            changing : permission.permissions.changing,
+            moderating : permission.permissions.moderating,
+          },
           username : permission.username
         });
       }
@@ -813,8 +830,12 @@ export default defineComponent({
       permissionsToEdit.value = getPermissionsToEdit();
     }
 
-    const editUsersPermissions = (permissions) => {
+    const kickUserFromTeam = (permission) => {
+      PermissionService.deleteUserFromTeam(permission);
+    }
 
+    const editUsersPermissions = (permissions) => {
+      PermissionService.editUserPermissions(permissions, currentTeam.value.teamId);
     }
 
     watch(notificationsDialog, (val)=> {
@@ -908,6 +929,7 @@ export default defineComponent({
       teamPermissions,
       permissionsDialog,
       permissionsToEdit,
+      kickUserFromTeam,
       editUsersPermissions,
       openPermissionsDialog,
       applyJoinRequest,
