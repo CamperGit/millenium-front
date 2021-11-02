@@ -153,25 +153,29 @@
     </q-card>
 
     <q-dialog v-model="expenseDialog" class="q-pa-none" position="standard">
-      <q-card id="dialog-add-info-schedule" class="q-pa-sm" style="width: 410px">
+      <q-card id="create-expense-dialog" class="q-pa-sm" style="width: 410px">
         <q-card-section v-if="expenseEditMode" class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
           <h6 class="q-pa-none q-my-sm">Изменить статью расхода:</h6>
         </q-card-section>
         <q-card-section v-else class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
           <h6 class="q-pa-none q-my-sm">Добавление нового расхода:</h6>
         </q-card-section>
+
         <q-card-section class="q-mx-sm q-py-none">
-          <q-input v-model="expenseName" label="Название"/>
+          <q-input dense filled v-model="expenseName" label="Название"/>
         </q-card-section>
-        <q-card-section>
-          <q-input v-model="expenseDescription"></q-input>
+        <q-card-section class="q-mx-sm q-py-sm">
+          <q-input square input-style="resize: none;" style="height: auto" counter filled rows="10" type="textarea"
+                   v-model="expenseDescription" label="Описание" lazy-rules
+                   :rules="[(val) => (!!val && val.length >= 1 && val.length <= 1000) || 'Описание не может быть меньше 1 символа или больше 1000']"
+                   />
         </q-card-section>
-        <q-card-section>
-          <q-select v-model="expensePriority" label="Приоритет" :options="priorityOptions" emit-value
+        <q-card-section class="q-mx-sm q-py-sm">
+          <q-select v-model="expensePriority" rounded outlined label="Приоритет" :options="priorityOptions" emit-value
                     map-options></q-select>
         </q-card-section>
-        <q-card-section>
-          <q-select v-model="expenseCategory" :options="categories" option-label="name" option-value="categoryId"
+        <q-card-section class="q-mx-sm q-py-sm">
+          <q-select v-model="expenseCategory" rounded outlined :options="categories" option-label="name" option-value="categoryId"
                     map-options emit-value label="Категория">
           </q-select>
         </q-card-section>
@@ -179,12 +183,12 @@
           <q-radio v-model="expensePriceType" val="fixed" label="Фиксированная сумма"/>
           <q-radio v-model="expensePriceType" val="range" label="Диапазон"/>
         </q-card-section>
-        <q-card-section v-if="expensePriceType === 'fixed'">
-          <q-input v-model="expenseFixedPrice" type="number" label="Фиксированная сумма"></q-input>
+        <q-card-section class="q-mx-sm q-py-sm" v-if="expensePriceType === 'fixed'">
+          <q-input dense filled v-model="expenseFixedPrice" type="number" label="Фиксированная сумма"></q-input>
         </q-card-section>
-        <q-card-section v-else class="row">
-          <q-input v-model="expenseMinPrice" type="number" label="От"></q-input>
-          <q-input v-model="expenseMaxPrice" type="number" label="До"></q-input>
+        <q-card-section class="row q-mx-sm q-py-sm justify-between" v-else>
+          <q-input dense filled v-model="expenseMinPrice" type="number" label="От"></q-input>
+          <q-input dense filled v-model="expenseMaxPrice" type="number" label="До"></q-input>
         </q-card-section>
         <q-card-actions class="justify-center q-mt-md">
           <q-btn v-if="expenseEditMode" size="md" :disable="!isExpenseValid" style="width: 110px" no-caps
@@ -998,5 +1002,10 @@ export default defineComponent({
   width: 500px;
   height: 600px;
   max-height: 600px;
+}
+
+#create-expense-dialog {
+  width: 500px;
+  min-width: 500px;
 }
 </style>
