@@ -50,6 +50,12 @@ export default boot(async ({store, router}) => {
     }
   });
   addSubscription({
+    name: '/user/queue/addNewUserToTeam', callback: (permissions) => {
+      const value = JSON.parse(permissions.body);
+      store.commit('teams/addNewUserToTeam', value);
+    }
+  });
+  addSubscription({
     name: '/user/queue/updateTeamPermissions', callback: (permissions) => {
       const value = JSON.parse(permissions.body);
       store.commit('teams/setTeamPermissions', value);

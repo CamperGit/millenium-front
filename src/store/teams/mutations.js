@@ -208,3 +208,9 @@ export function removeUserFromTeam(state, deletedPermission) {
     teamPermissions.splice(index, 1);
   }
 }
+
+export function addNewUserToTeam(state, userPermission) {
+  if (userPermission) {
+    state.teamPermissions.push(userPermission);
+  }
+}

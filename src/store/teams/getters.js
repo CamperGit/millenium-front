@@ -69,3 +69,7 @@ export function getModeratingPermission(state) {
   }
   return false;
 }
+
+export function getInviteLink(state) {
+  return state.currentTeam.inviteLink;
+}

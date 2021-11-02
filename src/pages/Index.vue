@@ -10,6 +10,9 @@
             <span v-else><u>Показать статистику</u></span>
           </q-btn>
           <q-space/>
+          <q-btn dense no-caps label="Пригласить" @click="inviteDialog = true">
+
+          </q-btn>
           <q-btn no-caps flat @click="teamSelectDialog = true">
             <u>Сменить рабочее пространство</u>
           </q-btn>
@@ -320,7 +323,6 @@
         </q-list>
       </q-card>
     </q-dialog>
-
     <q-dialog v-model="permissionsDialog">
       <q-card flat class="q-pa-none" style="width: 640px; min-width: 640px">
         <q-toolbar class="bg-purple text-white shadow-2">
@@ -358,7 +360,7 @@
               </q-item-section>
               <q-space/>
               <q-item-section class="q-ml-md" avatar>
-                <q-btn style="width: 110px" label="Исключить" color="red-4" @click="kickUserFromTeam(permission.permissions)" no-caps/>
+                <q-btn style="width: 110px" label="Исключить" color="red-4" @click="kickUserFromTeam(permission.permissions)" no-caps v-close-popup/>
               </q-item-section>
             </q-item>
             <q-separator/>
@@ -368,6 +370,19 @@
           <q-btn style="width: 110px" no-caps color="primary" label="Сохранить" @click="editUsersPermissions(permissionsToEdit)" v-close-popup></q-btn>
           <q-btn style="width: 110px" no-caps label="Отмена" v-close-popup></q-btn>
         </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="inviteDialog">
+      <q-card class="q-pa-sm" style="width: 410px">
+        <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
+          <h6 class="q-pa-none q-my-sm">Ссылка для приглашения:</h6>
+        </q-card-section>
+        <q-card-section class="q-mx-sm q-py-none">
+          <q-input readonly v-model="inviteLink"  label="Ссылка приглашение"/>
+        </q-card-section>
+        <q-card-section class="q-mx-sm">
+          Отправьте эту ссылку тем, кого хотите пригласить в вашу организацию.
+        </q-card-section>
       </q-card>
     </q-dialog>
 
@@ -566,10 +581,12 @@ export default defineComponent({
     const teamSelectDialog = ref(false);
     const notificationsDialog = ref(false);
     const permissionsDialog = ref(false);
+    const inviteDialog = ref(false);
     const yearFilterSelect = ref(0);
     const yearSelectColumns = ref([]);
     const monthFilterSelect = ref(0);
     const currentTeam = computed(() => store.getters['teams/getCurrentTeam']);
+    const inviteLink = computed(() => store.getters['teams/getInviteLink']);
     const teamPermissions = computed(() => store.getters['teams/getTeamUsersPermissions'])
     const unReadTeamJoinsRequests = computed(() => store.getters['teams/getUnReadJoinsRequests']);
     const unReadTeamMessages = computed(()=> store.getters['teams/getUnReadTeamMessages']);
@@ -929,6 +946,8 @@ export default defineComponent({
       teamPermissions,
       permissionsDialog,
       permissionsToEdit,
+      inviteDialog,
+      inviteLink,
       kickUserFromTeam,
       editUsersPermissions,
       openPermissionsDialog,
