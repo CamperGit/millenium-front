@@ -73,3 +73,7 @@ export function getModeratingPermission(state) {
 export function getInviteLink(state) {
   return state.currentTeam.inviteLink;
 }
+
+export function getExpensesFilters(state) {
+  return state.expensesFilters;
+}

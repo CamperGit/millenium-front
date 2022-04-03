@@ -94,7 +94,6 @@ export function updateCategories(state, newCategory) {
       let category = state.categories[index];
       category.name = newCategory.name;
       category.expenses = newCategory.expenses;
-      //state.categories.splice(index, 1, newCategory);
     } else {
       state.categories.push(newCategory);
     }

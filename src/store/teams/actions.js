@@ -1,5 +1,5 @@
 import TeamService from "src/services/team/teamService";
-import CategoryService from "src/services/expenses/categoryService";
+import ExpensesService from "src/services/expenses/expenseService";
 import PermissionService from "src/services/team/permissionService"
 
 export async function createNewTeam ( {commit}, {name, userId}) {
@@ -46,25 +46,6 @@ export function setUserPermission({commit, state}, userId) {
   }
 }
 
-/*export async function getUserPermissionInTeam({commit}, {userId, teamId}) {
-  try {
-    const data = await PermissionService.getUserPermissionInTeam(userId, teamId);
-    if (data) {
-      commit('setPermissions', data)
-      return data;
-    }
-  } catch (e) {
-    console.log(e)
-    throw e;
-  }
-}*/
-
-export async function filterExpensesAction({commit}, filters) {
-  const categories =  await CategoryService.filterCategories(filters);
-  console.log(categories);
-  commit('setExpensesFilters', filters);
-}
-
 export function setCurrentTeamAction({commit}, team) {
   commit('clearInfo');
   commit('setCurrentTeam', team)
@@ -87,16 +68,29 @@ export async function denyJoinRequest({commit}, request) {
   commit('removeJoinRequest', request);
 }
 
-export function addSelectedCategoryAction({commit, state}, category) {
+export function addSelectedCategoryAction({dispatch, commit, state}, category) {
   if (state.selectedCategories.includes(category)) {
     commit('removeSelectedCategory', category);
   } else {
+    dispatch('filterCategoryExpenses', category)
     if (state.selectedCategories.length === state.categories.length) {
       commit('selectAllCategories');
     } else {
       commit('addCategoryToSelected', category)
     }
   }
+}
+
+export async function filterCategoryExpenses({commit, state}, category) {
+  const filteredExpenses = await ExpensesService.filter({
+    ...state.expensesFilters,
+    category
+  });
+  const updatedCategory = {
+    ...category
+  }
+  updatedCategory.expenses = filteredExpenses;
+  commit('updateCategories', updatedCategory);
 }
 
 export function handleDeletedCategoryResponse({commit}, response) {

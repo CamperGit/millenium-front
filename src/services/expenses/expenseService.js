@@ -1,9 +1,28 @@
 import {stompClient} from "src/services/other/websocket";
+import {api} from "boot/axios";
 
 class ExpenseService {
+  async filter(filters) {
+    const categoryId = filters.category.categoryId;
+    const name = filters.filterByName ? filters.filterByName : null;
+    const minPrice = filters.filterByMinPrice || filters.filterByMinPrice >= 0 ? filters.filterByMinPrice : null;
+    const maxPrice = filters.filterByMaxPrice || filters.filterByMaxPrice > 0 ? filters.filterByMaxPrice : null;
+    try {
+      const {data} = await api.get("/expenses/filter",{
+        params: {
+          categoryId,
+          name,
+          minPrice,
+          maxPrice
+        },
+      })
+      return data;
+    } catch (e) {
+      throw e;
+    }
+  }
+
   createNewExpense(expense, teamId) {
-    console.log(expense)
-    console.log(teamId)
     let payload = {...createExpenseObject(expense), teamId};
     stompClient.send("/millenium/createExpense", {}, JSON.stringify(payload));
   }
@@ -19,7 +38,6 @@ class ExpenseService {
 }
 
 function createExpenseObject(expense) {
-  console.log(expense)
   let fixedPrice = expense.expenseFixedPrice;
   let minPrice = expense.expenseMinPrice;
   let maxPrice = expense.expenseMaxPrice;

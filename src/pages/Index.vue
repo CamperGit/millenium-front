@@ -418,6 +418,7 @@
                  @click="filterExpenses({filterByName, filterByMinPrice, filterByMaxPrice})" v-close-popup/>
           <q-btn size="md" style="width: 110px" no-caps
                  label="Сбросить"
+                 @click = "clearFilters"
                  v-close-popup/>
           <q-btn size="md" style="width: 110px;" no-caps label="Отмена" v-close-popup/>
         </q-card-actions>
@@ -640,7 +641,17 @@ export default defineComponent({
     const filterByMaxPrice = ref(0);
 
     const filterExpenses = (filters) => {
-      store.dispatch('teams/filterExpensesAction', filters)
+      store.commit('teams/setExpensesFilters', filters);
+      for (let category of selectedCategories.value) {
+        store.dispatch('teams/filterCategoryExpenses', category)
+      }
+    }
+
+    const clearFilters = () => {
+      store.commit('teams/clearExpensesFilters');
+      for (let category of selectedCategories.value) {
+        store.dispatch('teams/filterCategoryExpenses', category)
+      }
     }
 
     const toggleCategoryDrawer = () => {
@@ -921,10 +932,6 @@ export default defineComponent({
       store.commit('teams/setTeamLimitByYearAndMonth', {year: yearFilterSelect.value, month: val})
     })
 
-    watch(selectedExpenses, (val) => {
-      console.log(val)
-    })
-
     onMounted(async () => {
       const accessToken = store.getters['auth/getAccessToken'];
       if (currentUser.value && accessToken) {
@@ -1000,6 +1007,7 @@ export default defineComponent({
       filterByMinPrice,
       filterByMaxPrice,
       filterExpenses,
+      clearFilters,
       kickUserFromTeam,
       editUsersPermissions,
       openPermissionsDialog,

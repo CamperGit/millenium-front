@@ -11,6 +11,6 @@ export default function () {
     unReadTeamInvites : [],
     unReadTeamMessages : [],
     categoryDrawer : true,
-    expensesFilters : null
+    expensesFilters : null,
   }
 }

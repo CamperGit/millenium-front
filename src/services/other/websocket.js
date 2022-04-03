@@ -12,7 +12,7 @@ export function isConnected() {
   return !!stompClient;
 }
 
-export function connect( accessToken) {
+export function connect(accessToken) {
   if (accessToken !== null) {
     const socket = new SockJS('http://localhost:8080/ws');
     stompClient = Stomp.over(socket);
