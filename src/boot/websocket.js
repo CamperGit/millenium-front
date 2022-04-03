@@ -13,7 +13,6 @@ export default boot(async ({store, router}) => {
     return filterExpenseObject(filters, selectedCategories, expense);
   }
 
-
   addSubscription({
     name: '/user/queue/categoriesUpdating', callback: (category) => {
       const value = JSON.parse(category.body);
@@ -30,7 +29,7 @@ export default boot(async ({store, router}) => {
   addSubscription({
     name: '/user/queue/deletedExpenses', callback: (expense) => {
       const value = JSON.parse(expense.body);
-      if (filterExpense(expense)) {
+      if (filterExpense(value)) {
         store.commit('teams/deleteExpense', value);
       }
     }
@@ -127,6 +126,11 @@ function filterExpenseObject (filters, selectedCategories, expense) {
     if (fixedPrice && maxPrice < fixedPrice) filtered = false
     if (expenseMaxPrice && expenseMaxPrice < maxPrice) filtered = false
   }
+
+  if (filters.filterByPriority && expense.priority && !filters.filterByPriority.includes(expense.priority)) return false;
+  
+  if (filters.filterByTopCreatedDate && filters.filterByTopCreatedDate < expense.date) return false;
+  if (filters.filterByBottomCreatedDate && filters.filterByBottomCreatedDate > expense.date) return false;
 
   if (!selectedCategories.map(category => category.name).includes(expense.category.name)) filtered = false;
 

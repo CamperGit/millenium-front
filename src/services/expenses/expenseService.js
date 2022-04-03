@@ -5,16 +5,28 @@ class ExpenseService {
   async filter(filters) {
     const categoryId = filters.category.categoryId;
     const name = filters.filterByName ? filters.filterByName : null;
+    const createDateAtBottom = filters.filterByBottomCreatedDate && filters.filterByBottomCreatedDate !== '' ? filters.filterByBottomCreatedDate : null;
+    const createDateAtTop = filters.filterByTopCreatedDate && filters.filterByTopCreatedDate !== '' ? filters.filterByTopCreatedDate : null;
+    const priorities = filters.filterByPriority && filters.filterByPriority.length !== 0 ? filters.filterByPriority : null;
     const minPrice = filters.filterByMinPrice || filters.filterByMinPrice >= 0 ? filters.filterByMinPrice : null;
     const maxPrice = filters.filterByMaxPrice || filters.filterByMaxPrice > 0 ? filters.filterByMaxPrice : null;
+
+    let priorityIn = null;
+    if (priorities) {
+      priorityIn = priorities.reduce((f, s) => `${f},${s}`);
+    }
+
     try {
       const {data} = await api.get("/expenses/filter",{
         params: {
           categoryId,
+          createDateAtBottom,
+          createDateAtTop,
+          priorityIn,
           name,
           minPrice,
           maxPrice
-        },
+        }
       })
       return data;
     } catch (e) {

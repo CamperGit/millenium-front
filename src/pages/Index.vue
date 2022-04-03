@@ -404,23 +404,85 @@
     </q-card>
   </q-dialog>
     <q-dialog v-model="filtersDialog">
-      <q-card class="q-pa-sm" style="width: 500px">
+      <q-card class="q-pa-sm" style="min-width: 600px">
         <q-card-section class="q-px-md q-pb-md q-mx-sm q-mt-lg q-ma-none items-center">
           <q-input dense filled v-model="filterByName" label="Фильтрация по имени"></q-input>
         </q-card-section>
-        <q-card-section class="q-mx-sm q-pb-md row justify-between">
-          <q-input dense filled v-model="filterByMinPrice" label="Цена От"/>
-          <q-input dense filled v-model="filterByMaxPrice" label="Цена До"/>
+        <q-card-section class="q-mx-sm q-pb-md row">
+          <q-checkbox
+            class="col-md-6 col-lg-4"
+            v-for="priorityOption of filterByPriority"
+            :key="priorityOption"
+            keep-color
+            v-model="priorityOption.selected"
+            :label="priorityOption.label"
+            color="orange" />
         </q-card-section>
-        <q-card-actions>
+        <q-card-section class="q-mx-sm q-pb-md row justify-between">
+          <q-input style="min-width: 242px" dense filled v-model="filterByMinPrice" label="Цена От"/>
+          <q-input style="min-width: 242px" dense filled v-model="filterByMaxPrice" label="Цена До"/>
+        </q-card-section>
+        <q-card-section class="q-mx-sm q-pb-md row justify-between">
+          <q-input dense filled v-model="filterByBottomCreatedDate">
+            <template v-slot:prepend>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="filterByBottomCreatedDate" mask="YYYY-MM-DD HH:mm:ss">
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+            <template v-slot:append>
+              <q-icon name="access_time" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-time v-model="filterByBottomCreatedDate" mask="YYYY-MM-DD HH:mm:ss" format24h>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+          <q-input dense filled v-model="filterByTopCreatedDate">
+            <template v-slot:prepend>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="filterByTopCreatedDate" mask="YYYY-MM-DD HH:mm:ss">
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+            <template v-slot:append>
+              <q-icon name="access_time" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-time v-model="filterByTopCreatedDate" mask="YYYY-MM-DD HH:mm:ss" format24h>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </q-card-section>
+        <q-card-actions class="q-mx-md q-pb-md row">
           <q-btn size="md" style="width: 110px" no-caps
                  color="primary" label="Поиск"
-                 @click="filterExpenses({filterByName, filterByMinPrice, filterByMaxPrice})" v-close-popup/>
+                 @click="filterExpenses({filterByName, filterByMinPrice, filterByMaxPrice, filterByBottomCreatedDate,
+                 filterByTopCreatedDate, filterByPriority})" v-close-popup/>
           <q-btn size="md" style="width: 110px" no-caps
                  label="Сбросить"
                  @click = "clearFilters"
                  v-close-popup/>
-          <q-btn size="md" style="width: 110px;" no-caps label="Отмена" v-close-popup/>
+          <q-space/>
+          <q-btn size="md" style="width: 110px;" color="red-5" no-caps label="Отмена" v-close-popup/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -639,8 +701,13 @@ export default defineComponent({
     const filterByName = ref('');
     const filterByMinPrice = ref(0);
     const filterByMaxPrice = ref(0);
+    const filterByBottomCreatedDate = ref('');
+    const filterByTopCreatedDate = ref('');
+    const filterByPriority = ref(priorityOptions.map(option => { return {...option, selected: false} }));
 
     const filterExpenses = (filters) => {
+      console.log(filters)
+      filters.filterByPriority = filters.filterByPriority.filter(priority => priority.selected).map(priority => priority.value);
       store.commit('teams/setExpensesFilters', filters);
       for (let category of selectedCategories.value) {
         store.dispatch('teams/filterCategoryExpenses', category)
@@ -649,6 +716,16 @@ export default defineComponent({
 
     const clearFilters = () => {
       store.commit('teams/clearExpensesFilters');
+
+      filterByName.value = '';
+      filterByMinPrice.value = 0;
+      filterByMaxPrice.value = 0;
+      filterByBottomCreatedDate.value = '';
+      filterByTopCreatedDate.value = '';
+      for (let priority of filterByPriority.value) {
+        priority.selected = false;
+      }
+
       for (let category of selectedCategories.value) {
         store.dispatch('teams/filterCategoryExpenses', category)
       }
@@ -1006,6 +1083,9 @@ export default defineComponent({
       filterByName,
       filterByMinPrice,
       filterByMaxPrice,
+      filterByBottomCreatedDate,
+      filterByTopCreatedDate,
+      filterByPriority,
       filterExpenses,
       clearFilters,
       kickUserFromTeam,

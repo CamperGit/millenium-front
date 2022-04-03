@@ -1,6 +1,5 @@
 import TeamService from "src/services/team/teamService";
 import ExpensesService from "src/services/expenses/expenseService";
-import PermissionService from "src/services/team/permissionService"
 
 export async function createNewTeam ( {commit}, {name, userId}) {
   try {
@@ -18,10 +17,6 @@ export async function getTeamInvites({commit}, teamId) {
   } catch (e) {
     console.log(e);
   }
-}
-
-export async function getTeamMessages({commit}, teamId) {
-
 }
 
 export async function getTeamPermissions({commit}, teamId) {
