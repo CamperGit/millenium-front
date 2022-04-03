@@ -214,3 +214,11 @@ export function addNewUserToTeam(state, userPermission) {
     state.teamPermissions.push(userPermission);
   }
 }
+
+export function setExpensesFilters(state, filters) {
+  state.expensesFilters = filters;
+}
+
+export function clearExpensesFilters(state) {
+  state.expensesFilters = null;
+}

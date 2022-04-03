@@ -101,7 +101,10 @@
             <q-select v-model="monthFilterSelect" options-dense :options="monthSelectOptions" map-options emit-value
                       dense label="Фильтр по месяцу"/>
           </div>
-          <div class="col-6 col-md-3 offset-6 offset-md-3 row">
+          <div class="col-6 col-md-3">
+            <q-btn round color="primary" glossy icon="filter_alt" @click="filtersDialog = true"/>
+          </div>
+          <div class="col-6 col-md-3 row">
             <q-space/>
             <q-btn no-caps color="primary" v-if="isCanCreate" label="Добавить" @click="expenseDialog = true"></q-btn>
           </div>
@@ -387,6 +390,38 @@
           Отправьте эту ссылку тем, кого хотите пригласить в вашу организацию.
         </q-card-section>
       </q-card>
+    </q-dialog><q-dialog v-model="inviteDialog">
+    <q-card class="q-pa-sm" style="width: 410px">
+      <q-card-section class="q-px-md q-py-none q-mx-sm q-mt-lg q-ma-none items-center">
+        <h6 class="q-pa-none q-my-sm">Ссылка для приглашения:</h6>
+      </q-card-section>
+      <q-card-section class="q-mx-sm q-py-none">
+        <q-input readonly v-model="inviteLink"  label="Ссылка приглашение"/>
+      </q-card-section>
+      <q-card-section class="q-mx-sm">
+        Отправьте эту ссылку тем, кого хотите пригласить в вашу организацию.
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+    <q-dialog v-model="filtersDialog">
+      <q-card class="q-pa-sm" style="width: 500px">
+        <q-card-section class="q-px-md q-pb-md q-mx-sm q-mt-lg q-ma-none items-center">
+          <q-input dense filled v-model="filterByName" label="Фильтрация по имени"></q-input>
+        </q-card-section>
+        <q-card-section class="q-mx-sm q-pb-md row justify-between">
+          <q-input dense filled v-model="filterByMinPrice" label="Цена От"/>
+          <q-input dense filled v-model="filterByMaxPrice" label="Цена До"/>
+        </q-card-section>
+        <q-card-actions>
+          <q-btn size="md" style="width: 110px" no-caps
+                 color="primary" label="Поиск"
+                 @click="filterExpenses({filterByName, filterByMinPrice, filterByMaxPrice})" v-close-popup/>
+          <q-btn size="md" style="width: 110px" no-caps
+                 label="Сбросить"
+                 v-close-popup/>
+          <q-btn size="md" style="width: 110px;" no-caps label="Отмена" v-close-popup/>
+        </q-card-actions>
+      </q-card>
     </q-dialog>
 
   </q-page>
@@ -585,6 +620,7 @@ export default defineComponent({
     const notificationsDialog = ref(false);
     const permissionsDialog = ref(false);
     const inviteDialog = ref(false);
+    const filtersDialog = ref(false);
     const yearFilterSelect = ref(0);
     const yearSelectColumns = ref([]);
     const monthFilterSelect = ref(0);
@@ -598,6 +634,14 @@ export default defineComponent({
     const teamLimit = computed(() => store.getters['teams/getTeamLimit']);
     const categories = computed(() => store.getters['teams/getTeamCategories']);
     const selectedCategories = computed(() => store.getters['teams/getSelectedTeamCategories']);
+
+    const filterByName = ref('');
+    const filterByMinPrice = ref(0);
+    const filterByMaxPrice = ref(0);
+
+    const filterExpenses = (filters) => {
+      store.dispatch('teams/filterExpensesAction', filters)
+    }
 
     const toggleCategoryDrawer = () => {
       store.commit('teams/toggleCategoryDrawer');
@@ -951,6 +995,11 @@ export default defineComponent({
       permissionsToEdit,
       inviteDialog,
       inviteLink,
+      filtersDialog,
+      filterByName,
+      filterByMinPrice,
+      filterByMaxPrice,
+      filterExpenses,
       kickUserFromTeam,
       editUsersPermissions,
       openPermissionsDialog,

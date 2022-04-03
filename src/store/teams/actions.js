@@ -1,4 +1,5 @@
 import TeamService from "src/services/team/teamService";
+import CategoryService from "src/services/expenses/categoryService";
 import PermissionService from "src/services/team/permissionService"
 
 export async function createNewTeam ( {commit}, {name, userId}) {
@@ -57,6 +58,12 @@ export function setUserPermission({commit, state}, userId) {
     throw e;
   }
 }*/
+
+export async function filterExpensesAction({commit}, filters) {
+  const categories =  await CategoryService.filterCategories(filters);
+  console.log(categories);
+  commit('setExpensesFilters', filters);
+}
 
 export function setCurrentTeamAction({commit}, team) {
   commit('clearInfo');
